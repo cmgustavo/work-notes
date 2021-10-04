@@ -1,0 +1,14 @@
+com/worknotes/MainApplication.java
+ com.worknotes.MainApplication
+ com.worknotes.MainApplication$1
+com/worknotes/MainActivity.java
+ com.worknotes.MainActivity
+com/worknotes/ReactNativeFlipper.java
+ com.worknotes.ReactNativeFlipper
+ com.worknotes.ReactNativeFlipper$1
+ com.worknotes.ReactNativeFlipper$2
+ com.worknotes.ReactNativeFlipper$2$1
+com/facebook/react/PackageList.java
+ com.facebook.react.PackageList
+com/worknotes/BuildConfig.java
+ com.worknotes.BuildConfig

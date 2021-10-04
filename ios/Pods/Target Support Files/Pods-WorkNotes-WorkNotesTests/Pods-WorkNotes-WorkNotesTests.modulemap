@@ -1,0 +1,6 @@
+module Pods_WorkNotes_WorkNotesTests {
+  umbrella header "Pods-WorkNotes-WorkNotesTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
