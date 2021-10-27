@@ -1,5 +1,6 @@
 package com.worknotes;
 
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.facebook.react.ReactActivity;
 
 import android.os.Bundle;
@@ -13,6 +14,14 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "WorkNotes";
+  }
+
+  @Override
+  protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+        new AsyncStoragePackage()
+        );
   }
 
   @Override
