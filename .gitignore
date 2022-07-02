@@ -137,7 +137,7 @@ Session.vim
 
 # Xcode
 #
-build/
+ios/build
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -157,8 +157,8 @@ project.xcworkspace
 
 # Android/IntelliJ
 #
-build/
-.idea
-.gradle
-local.properties
-*.iml
+android/build
+android/.idea
+android/.gradle
+android/local.properties
+android/*.iml
