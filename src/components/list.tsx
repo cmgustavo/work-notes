@@ -14,6 +14,7 @@ class List extends React.PureComponent<Props> {
     return (
       <FlatList
         data={notes}
+        inverted={true}
         renderItem={({item}) => (
           <Box
             mb="5"
