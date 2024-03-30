@@ -1,9 +1,10 @@
 {
   "name": "WorkNotes",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "android-release": "npx react-native build-android --mode=release",
     "lint": "eslint .",
     "start": "react-native start",
     "clean": "react-native-clean-project",
