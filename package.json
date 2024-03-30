@@ -4,7 +4,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "android-release": "node ./scripts/sign_play_store.js && npx react-native build-android --mode=release",
+    "android-release": "NODE_ENV=production node ./scripts/sign_play_store.js && npx react-native build-android --mode=release",
     "lint": "eslint .",
     "start": "react-native start",
     "clean": "react-native-clean-project",
