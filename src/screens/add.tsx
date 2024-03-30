@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import moment from "moment";
-import { useColorScheme } from "react-native";
+import React, {useState} from 'react';
+import moment from 'moment';
+import {useColorScheme} from 'react-native';
 import {
   Heading,
   Center,
@@ -8,20 +8,20 @@ import {
   VStack,
   TextArea,
   Button,
-} from "native-base";
+} from 'native-base';
 
-import { storeData } from "../services/storage";
+import {storeData} from '../services/storage';
 
-const AddNote = ({ route, navigation }) => {
-  let { notes } = route.params.notes;
-  const [textAreaValue, setTextAreaValue] = useState("");
+const AddNote = ({route, navigation}) => {
+  let {notes} = route.params ? route.params.notes : {notes: []};
+  const [textAreaValue, setTextAreaValue] = useState('');
   const today = Date.now();
-  const dark: boolean = useColorScheme() === "dark" ? true : false;
-  const backgroundColor = dark ? "light.800" : "light.300";
-  const foregroundColor = dark ? "light.300" : "light.800";
+  const dark: boolean = useColorScheme() === 'dark' ? true : false;
+  const backgroundColor = dark ? 'light.800' : 'light.300';
+  const foregroundColor = dark ? 'light.300' : 'light.800';
 
   const addNote = (text: string) => {
-    notes.push({ note: text, date: today });
+    notes.push({note: text, date: today});
     storeData(notes);
   };
 
@@ -29,7 +29,7 @@ const AddNote = ({ route, navigation }) => {
     <NativeBaseProvider>
       <Center>
         <VStack width="90%">
-          <Heading my="5">{moment(today).format("dddd, MMMM Do YYYY")}</Heading>
+          <Heading my="5">{moment(today).format('dddd, MMMM Do YYYY')}</Heading>
           <TextArea
             h={40}
             mb={7}
@@ -37,7 +37,7 @@ const AddNote = ({ route, navigation }) => {
             color={foregroundColor}
             backgroundColor={backgroundColor}
             value={textAreaValue}
-            onChangeText={(v) => setTextAreaValue(v)}
+            onChangeText={v => setTextAreaValue(v)}
             placeholder="Write a new note"
           />
           <Button
@@ -45,10 +45,9 @@ const AddNote = ({ route, navigation }) => {
             colorScheme="primary"
             onPress={() => {
               addNote(textAreaValue);
-              setTextAreaValue("");
+              setTextAreaValue('');
               navigation.goBack();
-            }}
-          >
+            }}>
             Save
           </Button>
         </VStack>

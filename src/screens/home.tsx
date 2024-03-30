@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { ActivityIndicator } from "react-native";
-import { NativeBaseProvider, ScrollView } from "native-base";
+import React, {useState, useEffect} from 'react';
+import {ActivityIndicator} from 'react-native';
+import {NativeBaseProvider} from 'native-base';
 
-import { getData } from "../services/storage";
+import {getData} from '../services/storage';
 
-import Welcome from "../components/welcome";
-import AddButton from "../components/add-button";
-import List from "../components/list";
-import Error from "../components/error";
+import Welcome from '../components/welcome';
+import AddButton from '../components/add-button';
+import List from '../components/list';
+import Error from '../components/error';
 
-const Home = ({ navigation }) => {
+const Home = ({navigation}) => {
   const [notes, setNotes] = useState([]);
 
   const [error, setError] = useState(false);
@@ -28,7 +28,7 @@ const Home = ({ navigation }) => {
       .finally(() => {
         setLoaded(true);
       });
-  }, []);
+  }, [notes]);
 
   return (
     <NativeBaseProvider>
@@ -40,7 +40,7 @@ const Home = ({ navigation }) => {
       {loaded && !error && <List notes={notes} navigation={navigation} />}
       {!loaded && <ActivityIndicator size="large" />}
       {error && (
-        <Error errorText1={"Error"} errorText2={"Could not load the page"} />
+        <Error errorText1={'Error'} errorText2={'Could not load the page'} />
       )}
     </NativeBaseProvider>
   );

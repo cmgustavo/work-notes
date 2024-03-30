@@ -1,7 +1,7 @@
-import React from "react";
-import moment from "moment";
-import { TouchableWithoutFeedback } from "react-native";
-import { Text, Heading, FlatList, Box, VStack } from "native-base";
+import React from 'react';
+import moment from 'moment';
+import {TouchableWithoutFeedback} from 'react-native';
+import {Text, Heading, FlatList, Box, VStack} from 'native-base';
 
 interface Props {
   navigation: any;
@@ -10,23 +10,27 @@ interface Props {
 
 class List extends React.PureComponent<Props> {
   render() {
-    const { notes, navigation } = this.props;
+    const {notes, navigation} = this.props;
     return (
       <FlatList
         data={notes}
-        renderItem={({ item }) => (
-          <Box mb="5" p="5" overflow="hidden" borderBottomWidth="1">
+        renderItem={({item}) => (
+          <Box
+            mb="5"
+            p="5"
+            overflow="hidden"
+            borderBottomWidth="1"
+            borderBottomColor={'#ddd'}>
             <TouchableWithoutFeedback
               onPress={() => {
-                navigation.push("ViewNote", {
+                navigation.push('ViewNote', {
                   note: item.note,
                   date: item.date,
                 });
-              }}
-            >
+              }}>
               <VStack>
                 <Heading mb="3">
-                  {moment(item.date).format("dddd, MMMM Do YYYY")}
+                  {moment(item.date).format('dddd, MMMM Do YYYY')}
                 </Heading>
                 <Text mb="3" fontSize="md">
                   {item.note}
@@ -36,7 +40,7 @@ class List extends React.PureComponent<Props> {
             </TouchableWithoutFeedback>
           </Box>
         )}
-        keyExtractor={(item) => item.date}
+        keyExtractor={item => item.date}
       />
     );
   }
