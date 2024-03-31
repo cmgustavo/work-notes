@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import {ActivityIndicator} from 'react-native';
-import {NativeBaseProvider} from 'native-base';
 
 import {getData} from '../services/storage';
 
@@ -31,7 +30,7 @@ const Home = ({navigation}) => {
   }, [notes]);
 
   return (
-    <NativeBaseProvider>
+    <>
       {notes.length > 0 ? (
         <AddButton notes={notes} navigation={navigation} />
       ) : (
@@ -42,7 +41,7 @@ const Home = ({navigation}) => {
       {error && (
         <Error errorText1={'Error'} errorText2={'Could not load the page'} />
       )}
-    </NativeBaseProvider>
+    </>
   );
 };
 

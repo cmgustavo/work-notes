@@ -1,6 +1,5 @@
-import React from "react";
-import { StyleSheet } from "react-native";
-import { Text, View } from "native-base";
+import React from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 
 interface Props {
   errorText1: string;
@@ -9,7 +8,7 @@ interface Props {
 
 class Error extends React.PureComponent<Props> {
   render() {
-    const { errorText1, errorText2 } = this.props;
+    const {errorText1, errorText2} = this.props;
     return (
       <View style={styles.container}>
         <Text style={styles.text}>{errorText1}</Text>
@@ -22,12 +21,12 @@ class Error extends React.PureComponent<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
-    fontWeight: "bold",
-    color: "red",
+    fontWeight: 'bold',
+    color: 'red',
   },
 });
 

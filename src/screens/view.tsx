@@ -1,24 +1,13 @@
 import React from 'react';
 import moment from 'moment';
-import {useColorScheme} from 'react-native';
-import {Heading, Center, NativeBaseProvider, VStack, Box} from 'native-base';
+import {View, Text} from 'react-native';
 
 const ViewNote = ({route}) => {
-  const dark: boolean = useColorScheme() === 'dark' ? true : false;
-  const backgroundColor = dark ? 'light.800' : 'light.100';
   return (
-    <NativeBaseProvider>
-      <Center>
-        <VStack width="90%">
-          <Heading my="5">
-            {moment(route.params.date).format('dddd, MMMM Do YYYY')}
-          </Heading>
-          <Box p={3} bg={backgroundColor}>
-            {route.params.note}
-          </Box>
-        </VStack>
-      </Center>
-    </NativeBaseProvider>
+    <View>
+      <Text>{moment(route.params.date).format('dddd, MMMM Do YYYY')}</Text>
+      <Text>{route.params.note}</Text>
+    </View>
   );
 };
 

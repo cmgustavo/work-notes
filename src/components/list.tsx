@@ -1,7 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import {TouchableWithoutFeedback} from 'react-native';
-import {Text, Heading, FlatList, Box, VStack} from 'native-base';
+import {TouchableWithoutFeedback, Text, FlatList, View} from 'react-native';
 
 interface Props {
   navigation: any;
@@ -16,30 +15,19 @@ class List extends React.PureComponent<Props> {
         data={notes}
         inverted={true}
         renderItem={({item}) => (
-          <Box
-            mb="5"
-            p="5"
-            overflow="hidden"
-            borderBottomWidth="1"
-            borderBottomColor={'#ddd'}>
-            <TouchableWithoutFeedback
-              onPress={() => {
-                navigation.push('ViewNote', {
-                  note: item.note,
-                  date: item.date,
-                });
-              }}>
-              <VStack>
-                <Heading mb="3">
-                  {moment(item.date).format('dddd, MMMM Do YYYY')}
-                </Heading>
-                <Text mb="3" fontSize="md">
-                  {item.note}
-                </Text>
-                <Text fontWeight="200">{moment(item.date).fromNow()}</Text>
-              </VStack>
-            </TouchableWithoutFeedback>
-          </Box>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              navigation.push('ViewNote', {
+                note: item.note,
+                date: item.date,
+              });
+            }}>
+            <View>
+              <Text>{moment(item.date).format('dddd, MMMM Do YYYY')}</Text>
+              <Text>{item.note}</Text>
+              <Text>{moment(item.date).fromNow()}</Text>
+            </View>
+          </TouchableWithoutFeedback>
         )}
         keyExtractor={item => item.date}
       />

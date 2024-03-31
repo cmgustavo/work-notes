@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Fab, AddIcon} from 'native-base';
+import {View, Button} from 'react-native';
 
 interface Props {
   navigation: any;
@@ -10,13 +10,12 @@ class AddButton extends React.PureComponent<Props> {
   render() {
     const {notes, navigation} = this.props;
     return (
-      <Box>
-        <Fab
-          size="sm"
-          icon={<AddIcon size="sm" />}
+      <View>
+        <Button
+          title="Add Note"
           onPress={() => navigation.navigate('AddNote', {notes: {notes}})}
         />
-      </Box>
+      </View>
     );
   }
 }
