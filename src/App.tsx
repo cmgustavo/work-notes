@@ -1,19 +1,30 @@
-import React from "react";
-import { useColorScheme } from "react-native";
+import React, {useCallback, useEffect, useState} from 'react';
+import {useColorScheme, ColorSchemeName, Appearance} from 'react-native';
 
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
-} from "@react-navigation/native";
+} from '@react-navigation/native';
 
-import MainNavigation from "./components/main-navigation";
+import MainNavigation from './components/main-navigation';
 
 const App = () => {
-  const scheme = useColorScheme();
+  const [theme, setTheme] = useState<ColorSchemeName>(useColorScheme());
+
+  const themeChangeListener = useCallback(() => {
+    setTheme(Appearance.getColorScheme());
+  }, []);
+
+  useEffect(() => {
+    Appearance.addChangeListener(themeChangeListener);
+    return () => {
+      Appearance.addChangeListener(themeChangeListener);
+    };
+  }, [themeChangeListener]);
 
   return (
-    <NavigationContainer theme={scheme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
       <MainNavigation />
     </NavigationContainer>
   );

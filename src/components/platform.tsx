@@ -1,16 +1,12 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import {Text} from 'react-native';
+import {useTheme} from '@react-navigation/native';
 
 import getPlatform from '../services/platform';
 
-class CurrentPlatform extends React.PureComponent {
-  render() {
-    return (
-      <View>
-        <Text>You're using {getPlatform()}</Text>
-      </View>
-    );
-  }
-}
+const CurrentPlatform = () => {
+  const {colors} = useTheme();
+  return <Text style={{color: colors.text}}>You're using {getPlatform()}</Text>;
+};
 
 export default CurrentPlatform;
