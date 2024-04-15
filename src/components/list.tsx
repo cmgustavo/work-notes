@@ -21,6 +21,7 @@ const List = ({notes, navigation}: Props) => {
           style={[styles.noteContainer, {backgroundColor: colors.card}]}
           onPress={() => {
             navigation.push('ViewNote', {
+              notes: notes,
               note: item.note,
               date: item.date,
             });

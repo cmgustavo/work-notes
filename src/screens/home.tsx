@@ -50,9 +50,13 @@ const Home = ({navigation}) => {
   return (
     <SafeAreaView
       style={[styles.globalContainer, {backgroundColor: colors.background}]}>
-      {notes.length > 0 ? null : <Welcome navigation={navigation} />}
+      {notes.length === 0 && loaded ? (
+        <Welcome navigation={navigation} />
+      ) : null}
       {loaded && !error && <List notes={notes} navigation={navigation} />}
-      {!loaded && <ActivityIndicator size="large" />}
+      {!loaded ? (
+        <ActivityIndicator size="large" style={styles.welcomeContainer} />
+      ) : null}
       {error && (
         <Error errorText1={'Error'} errorText2={'Could not load the page'} />
       )}

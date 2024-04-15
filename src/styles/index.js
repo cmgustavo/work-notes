@@ -27,6 +27,12 @@ export default StyleSheet.create({
     fontSize: 12,
     fontWeight: '100',
   },
+  noteMainContent: {
+    fontSize: 18,
+    fontWeight: '300',
+    marginBottom: 20,
+    marginTop: 10,
+  },
   welcomeContainer: {
     flex: 1,
     alignItems: 'center',

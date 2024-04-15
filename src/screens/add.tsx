@@ -39,7 +39,14 @@ const AddNote = ({route, navigation}) => {
         placeholder="Write a new note"
       />
       <TouchableOpacity
-        style={[styles.button, {backgroundColor: colors.primary}]}
+        style={[
+          styles.button,
+          {
+            backgroundColor:
+              textAreaValue.length === 0 ? colors.border : colors.primary,
+          },
+        ]}
+        disabled={textAreaValue.length === 0}
         onPress={() => {
           addNote(textAreaValue);
           setTextAreaValue('');
