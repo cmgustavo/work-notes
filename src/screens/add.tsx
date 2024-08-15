@@ -9,19 +9,29 @@ import {
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 
-import {storeData} from '../services/storage';
+import {useAppDispatch} from '../store';
+import {createNote} from '../store/app';
 import styles from '../styles';
 
-const AddNote = ({route, navigation}) => {
+const getUniqueId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
+
+const AddNote = ({navigation}) => {
+  const dispatch = useAppDispatch();
   const {colors} = useTheme();
   const scheme = useColorScheme();
-  let {notes} = route.params ? route.params.notes : {notes: []};
   const [textAreaValue, setTextAreaValue] = useState('');
   const today = Date.now();
 
   const addNote = (text: string) => {
-    notes.push({note: text, date: today});
-    storeData(notes);
+    dispatch(
+      createNote({
+        id: getUniqueId(),
+        text: text,
+        date: Date.now(),
+      }),
+    );
   };
 
   return (

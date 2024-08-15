@@ -21,8 +21,8 @@ const List = ({notes, navigation}: Props) => {
           style={[styles.noteContainer, {backgroundColor: colors.card}]}
           onPress={() => {
             navigation.push('ViewNote', {
-              notes: notes,
-              note: item.note,
+              id: item.id,
+              text: item.text,
               date: item.date,
             });
           }}>
@@ -31,7 +31,7 @@ const List = ({notes, navigation}: Props) => {
               {moment(item.date).format('dddd, MMMM Do YYYY')}
             </Text>
             <Text style={[styles.noteContent, {color: colors.text}]}>
-              {item.note}
+              {item.text}
             </Text>
             <Text style={[styles.noteDate, {color: colors.text}]}>
               {moment(item.date).fromNow()}

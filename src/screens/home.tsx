@@ -7,7 +7,9 @@ import {
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 
-import {getData} from '../services/storage';
+import {useAppDispatch, useAppSelector, RootState} from '../store';
+import {notesInitialize} from '../store/app';
+import {NoteObject} from '../store/app/app.types';
 
 import Welcome from '../components/welcome';
 import List from '../components/list';
@@ -15,32 +17,18 @@ import Error from '../components/error';
 import styles from '../styles';
 
 const Home = ({navigation}) => {
+  const dispatch = useAppDispatch();
   const {colors} = useTheme();
-  const [notes, setNotes] = useState([]);
+  const _notes = useAppSelector(({APP}: RootState) => APP.notes);
+  const [notes, setNotes] = useState<NoteObject[]>(_notes);
 
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  const readNotesFromStorage = async () => {
-    const data = (await getData()) || [];
-    setNotes(data);
-  };
-
-  useEffect(() => {
-    readNotesFromStorage()
-      .catch(() => {
-        setError(true);
-      })
-      .finally(() => {
-        setLoaded(true);
-      });
-  }, [notes]);
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AddNote', {notes: {notes}})}>
+        <TouchableOpacity onPress={() => navigation.navigate('AddNote')}>
           <Text style={{color: colors.text}}>New Note</Text>
         </TouchableOpacity>
       ),
@@ -50,16 +38,8 @@ const Home = ({navigation}) => {
   return (
     <SafeAreaView
       style={[styles.globalContainer, {backgroundColor: colors.background}]}>
-      {notes.length === 0 && loaded ? (
-        <Welcome navigation={navigation} />
-      ) : null}
-      {loaded && !error && <List notes={notes} navigation={navigation} />}
-      {!loaded ? (
-        <ActivityIndicator size="large" style={styles.welcomeContainer} />
-      ) : null}
-      {error && (
-        <Error errorText1={'Error'} errorText2={'Could not load the page'} />
-      )}
+      {notes.length === 0 ? <Welcome navigation={navigation} /> : null}
+      {!error && <List notes={notes} navigation={navigation} />}
     </SafeAreaView>
   );
 };
