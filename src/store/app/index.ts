@@ -6,4 +6,4 @@ export {
   deleteNote,
   updateNote,
 } from './app.actions';
-export {notesInitialize} from './app.effects';
+export {initialize} from './app.effects';

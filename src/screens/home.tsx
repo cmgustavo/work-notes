@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useLayoutEffect} from 'react';
+import React, {useLayoutEffect} from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -8,22 +8,17 @@ import {
 import {useTheme} from '@react-navigation/native';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
-import {notesInitialize} from '../store/app';
+import {initialize} from '../store/app';
 import {NoteObject} from '../store/app/app.types';
 
 import Welcome from '../components/welcome';
 import List from '../components/list';
-import Error from '../components/error';
 import styles from '../styles';
 
 const Home = ({navigation}) => {
   const dispatch = useAppDispatch();
   const {colors} = useTheme();
   const _notes = useAppSelector(({APP}: RootState) => APP.notes);
-  const [notes, setNotes] = useState<NoteObject[]>(_notes);
-
-  const [error, setError] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -38,8 +33,11 @@ const Home = ({navigation}) => {
   return (
     <SafeAreaView
       style={[styles.globalContainer, {backgroundColor: colors.background}]}>
-      {notes.length === 0 ? <Welcome navigation={navigation} /> : null}
-      {!error && <List notes={notes} navigation={navigation} />}
+      {_notes.length === 0 ? (
+        <Welcome navigation={navigation} />
+      ) : (
+        <List notes={_notes} navigation={navigation} />
+      )}
     </SafeAreaView>
   );
 };
