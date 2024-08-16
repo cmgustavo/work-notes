@@ -1,26 +1,13 @@
-import {
-  AppActionType,
-  AppActionTypes,
-  AppLoading,
-  NoteObject,
-  GetNotesStatus,
-} from './app.types';
+import {AppActionType, AppActionTypes, AppStatus} from './app.types';
 
-export const AppReduxPersistBlackList: (keyof AppState)[] = [
-  'isLoading',
-  'getNotesStatus',
-];
+export const AppReduxPersistBlackList: (keyof AppState)[] = ['appStatus'];
 
 export interface AppState {
-  isLoading: AppLoading;
-  getNotesStatus: GetNotesStatus;
-  notes: NoteObject[];
+  appStatus: AppStatus;
 }
 
 const initialState: AppState = {
-  isLoading: false,
-  getNotesStatus: null,
-  notes: [],
+  appStatus: 'loading',
 };
 
 export const AppReducer = (
@@ -28,45 +15,16 @@ export const AppReducer = (
   action: AppActionType,
 ): AppState => {
   switch (action.type) {
-    case AppActionTypes.NOTES_PENDING:
+    case AppActionTypes.APP_SUCCESS:
       return {
         ...state,
-        isLoading: true,
+        appStatus: 'success',
       };
-    case AppActionTypes.NOTES_SUCCESS:
+    case AppActionTypes.APP_FAILED:
       return {
         ...state,
-        isLoading: false,
-        getNotesStatus: 'success',
-        notes: action.payload,
+        appStatus: 'failed',
       };
-    case AppActionTypes.NOTES_FAILED:
-      return {
-        ...state,
-        isLoading: false,
-        getNotesStatus: 'failed',
-      };
-
-    case AppActionTypes.CREATE:
-      return {
-        ...state,
-        notes: [...state.notes, action.payload],
-      };
-
-    case AppActionTypes.DELETE:
-      return {
-        ...state,
-        notes: state.notes.filter(note => note.id !== action.payload),
-      };
-
-    case AppActionTypes.UPDATE:
-      return {
-        ...state,
-        notes: state.notes.map(note =>
-          note.id === action.payload.id ? action.payload : note,
-        ),
-      };
-
     default:
       return state;
   }

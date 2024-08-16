@@ -1,4 +1,4 @@
-import React, {useLayoutEffect} from 'react';
+import React, {useLayoutEffect, useEffect} from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -8,8 +8,9 @@ import {
 import {useTheme} from '@react-navigation/native';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
-import {initialize} from '../store/app';
-import {NoteObject} from '../store/app/app.types';
+import {initialize} from '../store/notes';
+import {NoteObj} from '../store/notes/notes.models';
+import {NotesStatus} from '../store/notes/notes.types';
 
 import Welcome from '../components/welcome';
 import List from '../components/list';
@@ -18,7 +19,7 @@ import styles from '../styles';
 const Home = ({navigation}) => {
   const dispatch = useAppDispatch();
   const {colors} = useTheme();
-  const _notes = useAppSelector(({APP}: RootState) => APP.notes);
+  const _notes = useAppSelector(({NOTES}: RootState) => NOTES.notes);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -30,10 +31,14 @@ const Home = ({navigation}) => {
     });
   }, [navigation, colors]);
 
+  useEffect(() => {
+    dispatch(initialize());
+  }, []);
+
   return (
     <SafeAreaView
       style={[styles.globalContainer, {backgroundColor: colors.background}]}>
-      {_notes.length === 0 ? (
+      {Object.entries(_notes).length === 0 ? (
         <Welcome navigation={navigation} />
       ) : (
         <List notes={_notes} navigation={navigation} />

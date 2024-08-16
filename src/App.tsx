@@ -7,9 +7,12 @@ import {
   DarkTheme,
 } from '@react-navigation/native';
 
+import {useAppDispatch} from './store';
+import {initialize} from './store/app';
 import MainNavigation from './components/main-navigation';
 
 const App = () => {
+  const dispatch = useAppDispatch();
   const [theme, setTheme] = useState<ColorSchemeName>(useColorScheme());
 
   const themeChangeListener = useCallback(() => {
@@ -22,6 +25,10 @@ const App = () => {
       Appearance.addChangeListener(themeChangeListener);
     };
   }, [themeChangeListener]);
+
+  useEffect(() => {
+    dispatch(initialize());
+  }, []);
 
   return (
     <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme}>

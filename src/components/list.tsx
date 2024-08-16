@@ -12,34 +12,45 @@ interface Props {
 
 const List = ({notes, navigation}: Props) => {
   const {colors} = useTheme();
+
+  const _renderItem = ({item}) => {
+    const [_, itemData] = item;
+    return (
+      <TouchableOpacity
+        style={[styles.noteContainer, {backgroundColor: colors.card}]}
+        onPress={() => {
+          navigation.push('ViewNote', {
+            id: itemData.id,
+            text: itemData.text,
+            date: itemData.date,
+          });
+        }}>
+        <View>
+          <Text style={[styles.noteTitle, {color: colors.text}]}>
+            {moment(itemData.date).format('dddd, MMMM Do YYYY')}
+          </Text>
+          <Text style={[styles.noteContent, {color: colors.text}]}>
+            {itemData.text}
+          </Text>
+          <Text style={[styles.noteDate, {color: colors.text}]}>
+            {moment(itemData.date).fromNow()}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const _keyExtractor = item => {
+    const [key] = item;
+    return key;
+  };
+
   return (
     <FlatList
       style={[styles.notesContainer, {backgroundColor: colors.background}]}
-      data={notes.reverse()}
-      renderItem={({item}) => (
-        <TouchableOpacity
-          style={[styles.noteContainer, {backgroundColor: colors.card}]}
-          onPress={() => {
-            navigation.push('ViewNote', {
-              id: item.id,
-              text: item.text,
-              date: item.date,
-            });
-          }}>
-          <View>
-            <Text style={[styles.noteTitle, {color: colors.text}]}>
-              {moment(item.date).format('dddd, MMMM Do YYYY')}
-            </Text>
-            <Text style={[styles.noteContent, {color: colors.text}]}>
-              {item.text}
-            </Text>
-            <Text style={[styles.noteDate, {color: colors.text}]}>
-              {moment(item.date).fromNow()}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      )}
-      keyExtractor={item => item.date}
+      renderItem={_renderItem}
+      data={Object.entries(notes).reverse()}
+      keyExtractor={_keyExtractor}
     />
   );
 };

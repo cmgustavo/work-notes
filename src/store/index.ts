@@ -13,9 +13,11 @@ import {Selector} from 'reselect';
 import {useDispatch, useSelector, TypedUseSelectorHook} from 'react-redux';
 
 import {AppReducer, AppReduxPersistBlackList} from './app/app.reducer';
+import {NotesReducer, NotesReduxPersistBlackList} from './notes/notes.reducer';
 
 const reducers = {
   APP: AppReducer,
+  NOTES: NotesReducer,
 };
 
 const storage = new MMKV();
@@ -43,6 +45,7 @@ const persistConfig = {
 
 const reducerPersistBlackLists: Record<keyof typeof reducers, string[]> = {
   APP: AppReduxPersistBlackList,
+  NOTES: NotesReduxPersistBlackList,
 };
 
 const rootReducer = combineReducers(reducers);
@@ -56,6 +59,7 @@ const getStore = () => {
     undefined,
     applyMiddleware(thunk),
   );
+  // @ts-ignore
   const persistor = persistStore(store);
   return {store, persistor};
 };

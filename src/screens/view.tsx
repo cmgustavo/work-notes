@@ -3,7 +3,7 @@ import moment from 'moment';
 import {View, Text, TouchableOpacity} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import {useAppDispatch} from '../store';
-import {deleteNote} from '../store/app';
+import {deleteNote} from '../store/notes';
 
 import styles from '../styles';
 
