@@ -1,2 +1,2 @@
-export {appSuccess, appFailed} from './app.actions';
-export {initialize} from './app.effects';
+export {appSuccess, appFailed, appTheme} from './app.actions';
+export {initializeApp} from './app.effects';

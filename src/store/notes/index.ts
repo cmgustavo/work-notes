@@ -5,4 +5,4 @@ export {
   deleteNote,
   updateNote,
 } from './notes.actions';
-export {initialize} from './notes.effects';
+export {initializeNotes} from './notes.effects';

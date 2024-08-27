@@ -8,18 +8,19 @@ import {
 import {useTheme} from '@react-navigation/native';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
-import {initialize} from '../store/notes';
+import {initializeNotes} from '../store/notes';
 import {NoteObj} from '../store/notes/notes.models';
-import {NotesStatus} from '../store/notes/notes.types';
 
+import ErrorMessage from '../components/error';
 import Welcome from '../components/welcome';
 import List from '../components/list';
-import styles from '../styles';
+import {ContainerStyles} from '../styles';
 
 const Home = ({navigation}) => {
   const dispatch = useAppDispatch();
   const {colors} = useTheme();
-  const _notes = useAppSelector(({NOTES}: RootState) => NOTES.notes);
+  const notes = useAppSelector(({NOTES}: RootState) => NOTES.notes);
+  const status = useAppSelector(({NOTES}: RootState) => NOTES.status);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -32,16 +33,31 @@ const Home = ({navigation}) => {
   }, [navigation, colors]);
 
   useEffect(() => {
-    dispatch(initialize());
+    dispatch(initializeNotes());
   }, []);
 
   return (
     <SafeAreaView
-      style={[styles.globalContainer, {backgroundColor: colors.background}]}>
-      {Object.entries(_notes).length === 0 ? (
+      style={[
+        ContainerStyles.globalContainer,
+        {backgroundColor: colors.background},
+      ]}>
+      {!status ? (
+        <ActivityIndicator
+          size="large"
+          style={ContainerStyles.welcomeContainer}
+        />
+      ) : null}
+      {status === 'failed' ? (
+        <ErrorMessage
+          errorText1={'Error'}
+          errorText2={'Could not load the page'}
+        />
+      ) : null}
+      {Object.entries(notes).length == 0 ? (
         <Welcome navigation={navigation} />
       ) : (
-        <List notes={_notes} navigation={navigation} />
+        <List notes={notes} navigation={navigation} />
       )}
     </SafeAreaView>
   );

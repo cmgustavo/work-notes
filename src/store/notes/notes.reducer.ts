@@ -1,15 +1,15 @@
 import {NotesActionType, NotesActionTypes, NotesStatus} from './notes.types';
 import {NotesObj, NoteObj} from './notes.models';
 
-export const NotesReduxPersistBlackList: (keyof NotesState)[] = ['notesStatus'];
+export const NotesReduxPersistBlackList: (keyof NotesState)[] = ['status'];
 
 export interface NotesState {
-  notesStatus: NotesStatus;
+  status: NotesStatus;
   notes: NotesObj;
 }
 
 const initialState: NotesState = {
-  notesStatus: null,
+  status: null,
   notes: {},
 };
 
@@ -21,13 +21,13 @@ export const NotesReducer = (
     case NotesActionTypes.NOTES_SUCCESS:
       return {
         ...state,
-        notesStatus: 'success',
+        status: 'success',
         notes: action.payload,
       };
     case NotesActionTypes.NOTES_FAILED:
       return {
         ...state,
-        notesStatus: 'failed',
+        status: 'failed',
       };
 
     case NotesActionTypes.NOTES_CREATE:

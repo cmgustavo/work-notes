@@ -1,15 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {useColorScheme, ColorSchemeName, Appearance} from 'react-native';
 
-import {
-  NavigationContainer,
-  DefaultTheme,
-  DarkTheme,
-} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 
 import {useAppDispatch} from './store';
-import {initialize} from './store/app';
+import {initializeApp} from './store/app';
 import MainNavigation from './components/main-navigation';
+import LightTheme from './themes/light';
+import DarkTheme from './themes/dark';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -27,11 +25,11 @@ const App = () => {
   }, [themeChangeListener]);
 
   useEffect(() => {
-    dispatch(initialize());
+    dispatch(initializeApp());
   }, []);
 
   return (
-    <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationContainer theme={theme === 'dark' ? DarkTheme : LightTheme}>
       <MainNavigation />
     </NavigationContainer>
   );

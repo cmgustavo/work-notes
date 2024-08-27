@@ -1,10 +1,11 @@
 export type AppStatus = 'loading' | 'success' | 'failed';
 
-export type AppTheme = 'light' | 'dark';
+export type AppTheme = 'light' | 'dark' | 'system';
 
 export enum AppActionTypes {
   APP_SUCCESS = 'APP/SUCCESS',
   APP_FAILED = 'APP/APP_FAILED',
+  APP_THEME = 'APP/THEME',
 }
 
 interface AppSuccess {
@@ -15,4 +16,9 @@ interface AppFailed {
   type: typeof AppActionTypes.APP_FAILED;
 }
 
-export type AppActionType = AppSuccess | AppFailed;
+interface AppThemeAction {
+  type: typeof AppActionTypes.APP_THEME;
+  payload: AppTheme;
+}
+
+export type AppActionType = AppSuccess | AppFailed | AppThemeAction;

@@ -1,7 +1,7 @@
 import {Effect} from '../index';
-import {appSuccess, appFailed} from './index';
+import {appSuccess, appFailed, appTheme} from './index';
 
-export const initialize =
+export const initializeApp =
   (): Effect<Promise<any>> => async (dispatch, getState) => {
     const {APP} = getState();
     try {

@@ -3,7 +3,7 @@ import moment from 'moment';
 import {TouchableOpacity, Text, FlatList, View} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 
-import styles from '../styles';
+import {ContainerStyles, TextStyles} from '../styles';
 
 interface Props {
   navigation: any;
@@ -17,7 +17,10 @@ const List = ({notes, navigation}: Props) => {
     const [_, itemData] = item;
     return (
       <TouchableOpacity
-        style={[styles.noteContainer, {backgroundColor: colors.card}]}
+        style={[
+          ContainerStyles.noteContainer,
+          {backgroundColor: colors.card, borderColor: colors.border},
+        ]}
         onPress={() => {
           navigation.push('ViewNote', {
             id: itemData.id,
@@ -26,13 +29,13 @@ const List = ({notes, navigation}: Props) => {
           });
         }}>
         <View>
-          <Text style={[styles.noteTitle, {color: colors.text}]}>
+          <Text style={[TextStyles.noteTitle, {color: colors.primary}]}>
             {moment(itemData.date).format('dddd, MMMM Do YYYY')}
           </Text>
-          <Text style={[styles.noteContent, {color: colors.text}]}>
+          <Text style={[TextStyles.noteContent, {color: colors.text}]}>
             {itemData.text}
           </Text>
-          <Text style={[styles.noteDate, {color: colors.text}]}>
+          <Text style={[TextStyles.noteDate, {color: colors.text}]}>
             {moment(itemData.date).fromNow()}
           </Text>
         </View>
@@ -47,7 +50,10 @@ const List = ({notes, navigation}: Props) => {
 
   return (
     <FlatList
-      style={[styles.notesContainer, {backgroundColor: colors.background}]}
+      style={[
+        ContainerStyles.notesContainer,
+        {backgroundColor: colors.background},
+      ]}
       renderItem={_renderItem}
       data={Object.entries(notes).reverse()}
       keyExtractor={_keyExtractor}

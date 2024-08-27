@@ -1,11 +1,16 @@
-import React, {useLayoutEffect} from 'react';
+import React from 'react';
 import moment from 'moment';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Button} from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import {useAppDispatch} from '../store';
 import {deleteNote} from '../store/notes';
 
-import styles from '../styles';
+import {
+  ContainerStyles,
+  TextStyles,
+  GlobalStyles,
+  ButtonStyles,
+} from '../styles';
 
 const ViewNote = ({route, navigation}) => {
   const dispatch = useAppDispatch();
@@ -15,21 +20,31 @@ const ViewNote = ({route, navigation}) => {
     dispatch(deleteNote(id));
     navigation.goBack();
   };
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={() => _delete()}>
-          <Text style={{color: colors.notification}}>Delete</Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, colors]);
   return (
-    <View style={[styles.noteContainer, {backgroundColor: colors.background}]}>
-      <Text style={[styles.title, {color: colors.text}]}>
-        {moment(date).format('dddd, MMMM Do YYYY')}
-      </Text>
-      <Text style={[styles.noteMainContent, {color: colors.text}]}>{text}</Text>
+    <View
+      style={[
+        ContainerStyles.globalContainer,
+        {backgroundColor: colors.background},
+      ]}>
+      <View
+        style={[
+          ContainerStyles.noteContainer,
+          {backgroundColor: colors.background},
+        ]}>
+        <Text
+          style={[
+            TextStyles.title,
+            {color: colors.primary, borderColor: colors.border},
+          ]}>
+          {moment(date).format('dddd, MMMM Do YYYY')}
+        </Text>
+        <Text style={[ContainerStyles.noteMainContent, {color: colors.text}]}>
+          {text}
+        </Text>
+      </View>
+      <View style={[GlobalStyles.bottom, {backgroundColor: colors.background}]}>
+        <Button color={colors.notification} title="Delete" onPress={_delete} />
+      </View>
     </View>
   );
 };

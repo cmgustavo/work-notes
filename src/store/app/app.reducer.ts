@@ -1,13 +1,15 @@
-import {AppActionType, AppActionTypes, AppStatus} from './app.types';
+import {AppActionType, AppActionTypes, AppStatus, AppTheme} from './app.types';
 
 export const AppReduxPersistBlackList: (keyof AppState)[] = ['appStatus'];
 
 export interface AppState {
   appStatus: AppStatus;
+  appTheme: AppTheme;
 }
 
 const initialState: AppState = {
   appStatus: 'loading',
+  appTheme: 'system',
 };
 
 export const AppReducer = (
@@ -24,6 +26,11 @@ export const AppReducer = (
       return {
         ...state,
         appStatus: 'failed',
+      };
+    case AppActionTypes.APP_THEME:
+      return {
+        ...state,
+        appTheme: action.payload,
       };
     default:
       return state;

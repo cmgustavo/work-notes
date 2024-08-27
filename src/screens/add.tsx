@@ -11,7 +11,7 @@ import {useTheme} from '@react-navigation/native';
 
 import {useAppDispatch} from '../store';
 import {createNote} from '../store/notes';
-import styles from '../styles';
+import {ContainerStyles, TextStyles, FormStyles, ButtonStyles} from '../styles';
 
 const getUniqueId = () => {
   return Math.random().toString(36).substr(2, 9);
@@ -35,13 +35,17 @@ const AddNote = ({navigation}) => {
   };
 
   return (
-    <View style={[styles.formContainer, {backgroundColor: colors.background}]}>
-      <Text style={[styles.subtitle, {color: colors.text}]}>
+    <View
+      style={[
+        ContainerStyles.formContainer,
+        {backgroundColor: colors.background},
+      ]}>
+      <Text style={[TextStyles.subtitle, {color: colors.text}]}>
         {moment(today).format('dddd, MMMM Do YYYY')}
       </Text>
       <TextInput
         style={[
-          styles.textArea,
+          FormStyles.textArea,
           {color: colors.text, backgroundColor: colors.card},
         ]}
         value={textAreaValue}
@@ -50,7 +54,7 @@ const AddNote = ({navigation}) => {
       />
       <TouchableOpacity
         style={[
-          styles.button,
+          ButtonStyles.button,
           {
             backgroundColor:
               textAreaValue.length === 0 ? colors.border : colors.primary,
@@ -64,7 +68,7 @@ const AddNote = ({navigation}) => {
         }}>
         <Text
           style={[
-            styles.text,
+            TextStyles.text,
             {color: scheme === 'dark' ? colors.text : colors.card},
           ]}>
           Save

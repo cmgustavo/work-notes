@@ -1,4 +1,5 @@
 import React from 'react';
+import {useTheme} from '@react-navigation/native';
 import {StyleSheet, Text, View} from 'react-native';
 
 interface Props {
@@ -6,28 +7,20 @@ interface Props {
   errorText2: string;
 }
 
-class Error extends React.PureComponent<Props> {
-  render() {
-    const {errorText1, errorText2} = this.props;
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>{errorText1}</Text>
-        <Text style={styles.text}>{errorText2}</Text>
-      </View>
-    );
-  }
-}
+import {TextStyles, ContainerStyles} from '../styles';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontWeight: 'bold',
-    color: 'red',
-  },
-});
+const ErrorMessage = ({errorText1, errorText2}: Props) => {
+  const {colors} = useTheme();
+  return (
+    <View style={ContainerStyles.welcomeContainer}>
+      <Text style={[TextStyles.errorTitle, {color: colors.notification}]}>
+        {errorText1}
+      </Text>
+      <Text style={[TextStyles.error, {color: colors.notification}]}>
+        {errorText2}
+      </Text>
+    </View>
+  );
+};
 
-export default Error;
+export default ErrorMessage;
