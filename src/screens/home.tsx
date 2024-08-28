@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import {useTheme} from 'react-native-paper';
+import {useTheme, FAB} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
@@ -15,7 +15,7 @@ import {NoteObj} from '../store/notes/notes.models';
 import ErrorMessage from '../components/error';
 import Welcome from '../components/welcome';
 import List from '../components/list';
-import {ContainerStyles} from '../styles';
+import {ContainerStyles, GlobalStyles} from '../styles';
 
 const Home = ({navigation}) => {
   const dispatch = useAppDispatch();
@@ -58,7 +58,15 @@ const Home = ({navigation}) => {
       {Object.entries(notes).length == 0 ? (
         <Welcome navigation={navigation} />
       ) : (
-        <List notes={notes} navigation={navigation} />
+        <>
+          <List notes={notes} navigation={navigation} />
+          <FAB
+            label="Add Note"
+            icon="plus"
+            style={GlobalStyles.fab}
+            onPress={() => navigation.navigate('AddNote')}
+          />
+        </>
       )}
     </SafeAreaView>
   );

@@ -46,7 +46,11 @@ const AddNote = ({navigation}) => {
       <TextInput
         style={[
           FormStyles.textArea,
-          {color: colors.secondary, backgroundColor: colors.background},
+          {
+            color: colors.secondary,
+            backgroundColor: colors.surfaceVariant,
+            padding: 10,
+          },
         ]}
         value={textAreaValue}
         onChangeText={v => setTextAreaValue(v)}

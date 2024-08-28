@@ -36,7 +36,7 @@ const Welcome = ({navigation}: Props) => {
         ]}
         onPress={() => navigation.navigate('AddNote')}>
         <Text style={[TextStyles.text, {color: colors.onPrimaryContainer}]}>
-          Add Note
+          Add a new Note
         </Text>
       </TouchableOpacity>
       <View style={GlobalStyles.bottom}>

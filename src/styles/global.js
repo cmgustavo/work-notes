@@ -7,6 +7,12 @@ export const GlobalStyles = StyleSheet.create({
     bottom: 10,
     width: '100%',
   },
+  fab: {
+    position: 'absolute',
+    margin: 20,
+    right: 0,
+    bottom: 0,
+  },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',

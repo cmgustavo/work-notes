@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
-import {View, Text, TouchableOpacity, Button} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import {SafeAreaView, Text, View} from 'react-native';
+import {useTheme, Button} from 'react-native-paper';
 import {useAppDispatch} from '../store';
 import {deleteNote} from '../store/notes';
 
@@ -21,7 +21,7 @@ const ViewNote = ({route, navigation}) => {
     navigation.goBack();
   };
   return (
-    <View
+    <SafeAreaView
       style={[
         ContainerStyles.globalContainer,
         {backgroundColor: colors.background},
@@ -44,9 +44,15 @@ const ViewNote = ({route, navigation}) => {
         </Text>
       </View>
       <View style={[GlobalStyles.bottom]}>
-        <Button color={colors.error} title="Delete" onPress={_delete} />
+        <Button
+          color={colors.onSecondary}
+          icon="delete"
+          mode="contained"
+          onPress={_delete}>
+          Delete Note
+        </Button>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
