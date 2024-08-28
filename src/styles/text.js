@@ -17,9 +17,15 @@ export const TextStyles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 30,
     paddingBottom: 10,
     borderBottomWidth: 1,
+  },
+  optionsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginLeft: 10,
   },
   subtitle: {
     fontSize: 18,
@@ -28,6 +34,10 @@ export const TextStyles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
+    textAlign: 'center',
+  },
+  smallText: {
+    fontSize: 14,
     textAlign: 'center',
   },
   highlight: {

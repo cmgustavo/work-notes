@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import {useTheme} from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
 import {initializeNotes} from '../store/notes';
@@ -25,8 +26,8 @@ const Home = ({navigation}) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('AddNote')}>
-          <Text style={{color: colors.text}}>New Note</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
+          <Icon name="cog" size={25} color={colors.primary} />
         </TouchableOpacity>
       ),
     });

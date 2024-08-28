@@ -1,15 +1,16 @@
-import {AppActionType, AppActionTypes, AppStatus, AppTheme} from './app.types';
+import {ColorSchemeName} from 'react-native';
+import {AppActionType, AppActionTypes, AppStatus} from './app.types';
 
 export const AppReduxPersistBlackList: (keyof AppState)[] = ['appStatus'];
 
 export interface AppState {
   appStatus: AppStatus;
-  appTheme: AppTheme;
+  appTheme: ColorSchemeName;
 }
 
 const initialState: AppState = {
   appStatus: 'loading',
-  appTheme: 'system',
+  appTheme: null,
 };
 
 export const AppReducer = (

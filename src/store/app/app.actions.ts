@@ -1,4 +1,5 @@
-import {AppActionType, AppActionTypes, AppTheme} from './app.types';
+import {ColorSchemeName} from 'react-native';
+import {AppActionType, AppActionTypes} from './app.types';
 
 export const appSuccess = (): AppActionType => ({
   type: AppActionTypes.APP_SUCCESS,
@@ -8,7 +9,7 @@ export const appFailed = (): AppActionType => ({
   type: AppActionTypes.APP_FAILED,
 });
 
-export const appTheme = (theme: AppTheme): AppActionType => ({
+export const appTheme = (theme: ColorSchemeName): AppActionType => ({
   type: AppActionTypes.APP_THEME,
   payload: theme,
 });

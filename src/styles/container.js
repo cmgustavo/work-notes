@@ -3,17 +3,17 @@ import {StyleSheet} from 'react-native';
 export const ContainerStyles = StyleSheet.create({
   globalContainer: {
     flex: 1,
-    paddingTop: 20,
   },
   notesContainer: {
     flex: 1,
-    paddingBottom: 20,
+    paddingVertical: 20,
+    marginBottom: 20,
   },
   noteContainer: {
     padding: 20,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     marginBottom: 20,
-    borderRadius: 5,
+    borderBottomWidth: 1,
   },
   noteMainContent: {
     fontSize: 20,

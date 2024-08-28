@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, useColorScheme} from 'react-native';
-import {useTheme} from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
 
 import CurrentPlatform from './platform';
 import {
@@ -19,20 +19,23 @@ const Welcome = ({navigation}: Props) => {
   const scheme = useColorScheme();
   return (
     <View style={ContainerStyles.welcomeContainer}>
-      <Text style={[TextStyles.title, {color: colors.text}]}>
+      <Text
+        style={[
+          TextStyles.title,
+          {color: colors.primary, borderColor: colors.surfaceVariant},
+        ]}>
         Welcome to <Text style={TextStyles.highlight}>Work Notes</Text>
       </Text>
-      <Text style={[TextStyles.subtitle, {color: colors.text}]}>
+      <Text style={[TextStyles.subtitle, {color: colors.secondary}]}>
         Get start writing your first note for today.
       </Text>
       <TouchableOpacity
-        style={[ButtonStyles.button, {backgroundColor: colors.primary}]}
+        style={[
+          ButtonStyles.button,
+          {backgroundColor: colors.primaryContainer},
+        ]}
         onPress={() => navigation.navigate('AddNote')}>
-        <Text
-          style={[
-            TextStyles.text,
-            {color: scheme === 'dark' ? colors.text : colors.card},
-          ]}>
+        <Text style={[TextStyles.text, {color: colors.onPrimaryContainer}]}>
           Add Note
         </Text>
       </TouchableOpacity>

@@ -1,6 +1,5 @@
+import {ColorSchemeName} from 'react-native';
 export type AppStatus = 'loading' | 'success' | 'failed';
-
-export type AppTheme = 'light' | 'dark' | 'system';
 
 export enum AppActionTypes {
   APP_SUCCESS = 'APP/SUCCESS',
@@ -18,7 +17,7 @@ interface AppFailed {
 
 interface AppThemeAction {
   type: typeof AppActionTypes.APP_THEME;
-  payload: AppTheme;
+  payload: ColorSchemeName;
 }
 
 export type AppActionType = AppSuccess | AppFailed | AppThemeAction;

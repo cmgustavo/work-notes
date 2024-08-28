@@ -7,7 +7,7 @@ import {
   TextInput,
   useColorScheme,
 } from 'react-native';
-import {useTheme} from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
 
 import {useAppDispatch} from '../store';
 import {createNote} from '../store/notes';
@@ -40,13 +40,13 @@ const AddNote = ({navigation}) => {
         ContainerStyles.formContainer,
         {backgroundColor: colors.background},
       ]}>
-      <Text style={[TextStyles.subtitle, {color: colors.text}]}>
+      <Text style={[TextStyles.subtitle, {color: colors.primary}]}>
         {moment(today).format('dddd, MMMM Do YYYY')}
       </Text>
       <TextInput
         style={[
           FormStyles.textArea,
-          {color: colors.text, backgroundColor: colors.card},
+          {color: colors.secondary, backgroundColor: colors.background},
         ]}
         value={textAreaValue}
         onChangeText={v => setTextAreaValue(v)}
@@ -57,7 +57,9 @@ const AddNote = ({navigation}) => {
           ButtonStyles.button,
           {
             backgroundColor:
-              textAreaValue.length === 0 ? colors.border : colors.primary,
+              textAreaValue.length === 0
+                ? colors.surfaceDisabled
+                : colors.primaryContainer,
           },
         ]}
         disabled={textAreaValue.length === 0}
@@ -69,7 +71,10 @@ const AddNote = ({navigation}) => {
         <Text
           style={[
             TextStyles.text,
-            {color: scheme === 'dark' ? colors.text : colors.card},
+            {
+              color:
+                textAreaValue.length === 0 ? colors.surface : colors.primary,
+            },
           ]}>
           Save
         </Text>

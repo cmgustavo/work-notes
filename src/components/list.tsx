@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 import {TouchableOpacity, Text, FlatList, View} from 'react-native';
-import {useTheme} from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
 
 import {ContainerStyles, TextStyles} from '../styles';
 
@@ -19,7 +19,10 @@ const List = ({notes, navigation}: Props) => {
       <TouchableOpacity
         style={[
           ContainerStyles.noteContainer,
-          {backgroundColor: colors.card, borderColor: colors.border},
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceVariant,
+          },
         ]}
         onPress={() => {
           navigation.push('ViewNote', {
@@ -32,10 +35,10 @@ const List = ({notes, navigation}: Props) => {
           <Text style={[TextStyles.noteTitle, {color: colors.primary}]}>
             {moment(itemData.date).format('dddd, MMMM Do YYYY')}
           </Text>
-          <Text style={[TextStyles.noteContent, {color: colors.text}]}>
+          <Text style={[TextStyles.noteContent, {color: colors.secondary}]}>
             {itemData.text}
           </Text>
-          <Text style={[TextStyles.noteDate, {color: colors.text}]}>
+          <Text style={[TextStyles.noteDate, {color: colors.primary}]}>
             {moment(itemData.date).fromNow()}
           </Text>
         </View>

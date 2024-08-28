@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 import {View, Text, TouchableOpacity, Button} from 'react-native';
-import {useTheme} from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
 import {useAppDispatch} from '../store';
 import {deleteNote} from '../store/notes';
 
@@ -29,21 +29,22 @@ const ViewNote = ({route, navigation}) => {
       <View
         style={[
           ContainerStyles.noteContainer,
-          {backgroundColor: colors.background},
+          {backgroundColor: colors.background, borderColor: colors.background},
         ]}>
         <Text
           style={[
             TextStyles.title,
-            {color: colors.primary, borderColor: colors.border},
+            {color: colors.primary, borderColor: colors.surfaceVariant},
           ]}>
           {moment(date).format('dddd, MMMM Do YYYY')}
         </Text>
-        <Text style={[ContainerStyles.noteMainContent, {color: colors.text}]}>
+        <Text
+          style={[ContainerStyles.noteMainContent, {color: colors.primary}]}>
           {text}
         </Text>
       </View>
-      <View style={[GlobalStyles.bottom, {backgroundColor: colors.background}]}>
-        <Button color={colors.notification} title="Delete" onPress={_delete} />
+      <View style={[GlobalStyles.bottom]}>
+        <Button color={colors.error} title="Delete" onPress={_delete} />
       </View>
     </View>
   );

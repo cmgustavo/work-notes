@@ -7,4 +7,14 @@ export const GlobalStyles = StyleSheet.create({
     bottom: 10,
     width: '100%',
   },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+  },
+  itemText: {
+    flex: 1,
+    fontSize: 16,
+  },
 });

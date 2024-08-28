@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from '../screens/home';
 import ViewNote from '../screens/view';
 import AddNote from '../screens/add';
+import Preferences from '../screens/preferences';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,11 @@ class MainNavigation extends React.PureComponent {
           name="ViewNote"
           component={ViewNote}
           options={{title: 'Note', headerBackTitleVisible: false}}
+        />
+        <Stack.Screen
+          name="Preferences"
+          component={Preferences}
+          options={{title: 'Preferences', headerBackTitleVisible: false}}
         />
       </Stack.Navigator>
     );
