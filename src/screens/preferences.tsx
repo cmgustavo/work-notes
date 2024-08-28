@@ -1,35 +1,39 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {View, Text, TouchableOpacity, Appearance} from 'react-native';
 import {RadioButton, List} from 'react-native-paper';
 import {useAppDispatch, useAppSelector, RootState} from '../store';
-import {useTheme} from 'react-native-paper';
+import {useTheme, Switch} from 'react-native-paper';
 import {useColorScheme, ColorSchemeName} from 'react-native';
 
-import {appTheme} from '../store/app/app.actions';
+import {
+  PreferencesContext,
+  usePreferences,
+} from '../context/PreferencesContext';
 import {ContainerStyles, GlobalStyles, TextStyles} from '../styles';
 
 const Preferences = ({route, navigation}) => {
   const dispatch = useAppDispatch();
-  const {colors} = useTheme();
-  const _theme = useAppSelector(({APP}: RootState) => APP.appTheme);
-  const [theme, setTheme] = useState<ColorSchemeName>(_theme);
-  const [checked, setChecked] = useState(theme);
+  const theme = useTheme();
+
+  const {colorTheme, setColorTheme} = usePreferences();
+  console.log('[preferences.tsx:16]', colorTheme); /* TODO */
+
+  const [checked, setChecked] = useState(colorTheme);
+  console.log('[preferences.tsx:19]', checked); /* TODO */
 
   const handleThemeChange = (newTheme: ColorSchemeName) => {
+    setColorTheme(newTheme);
     setChecked(newTheme);
-    dispatch(appTheme(newTheme));
-    setTheme(newTheme);
-    Appearance.setColorScheme(newTheme);
   };
 
   return (
     <View
       style={[
         ContainerStyles.globalContainer,
-        {backgroundColor: colors.background},
+        {backgroundColor: theme.colors.background},
       ]}>
       <List.Section>
-        <Text style={[TextStyles.optionsTitle, {color: colors.primary}]}>
+        <Text style={[TextStyles.optionsTitle, {color: theme.colors.primary}]}>
           Theme
         </Text>
         <TouchableOpacity
@@ -37,11 +41,11 @@ const Preferences = ({route, navigation}) => {
           style={[
             GlobalStyles.itemContainer,
             {
-              backgroundColor: colors.background,
-              borderBottomColor: colors.surfaceVariant,
+              backgroundColor: theme.colors.background,
+              borderBottomColor: theme.colors.surfaceVariant,
             },
           ]}>
-          <Text style={[GlobalStyles.itemText, {color: colors.primary}]}>
+          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
             Light
           </Text>
           <RadioButton
@@ -55,11 +59,11 @@ const Preferences = ({route, navigation}) => {
           style={[
             GlobalStyles.itemContainer,
             {
-              backgroundColor: colors.background,
-              borderBottomColor: colors.surfaceVariant,
+              backgroundColor: theme.colors.background,
+              borderBottomColor: theme.colors.surfaceVariant,
             },
           ]}>
-          <Text style={[GlobalStyles.itemText, {color: colors.primary}]}>
+          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
             Dark
           </Text>
           <RadioButton
@@ -73,11 +77,11 @@ const Preferences = ({route, navigation}) => {
           style={[
             GlobalStyles.itemContainer,
             {
-              backgroundColor: colors.background,
-              borderBottomColor: colors.surfaceVariant,
+              backgroundColor: theme.colors.background,
+              borderBottomColor: theme.colors.surfaceVariant,
             },
           ]}>
-          <Text style={[GlobalStyles.itemText, {color: colors.primary}]}>
+          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
             System
           </Text>
           <RadioButton

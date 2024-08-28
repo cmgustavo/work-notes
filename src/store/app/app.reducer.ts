@@ -5,12 +5,12 @@ export const AppReduxPersistBlackList: (keyof AppState)[] = ['appStatus'];
 
 export interface AppState {
   appStatus: AppStatus;
-  appTheme: ColorSchemeName;
+  colorScheme: ColorSchemeName;
 }
 
 const initialState: AppState = {
   appStatus: 'loading',
-  appTheme: null,
+  colorScheme: null,
 };
 
 export const AppReducer = (
@@ -31,7 +31,7 @@ export const AppReducer = (
     case AppActionTypes.APP_THEME:
       return {
         ...state,
-        appTheme: action.payload,
+        colorScheme: action.payload,
       };
     default:
       return state;

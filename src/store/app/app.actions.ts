@@ -9,7 +9,7 @@ export const appFailed = (): AppActionType => ({
   type: AppActionTypes.APP_FAILED,
 });
 
-export const appTheme = (theme: ColorSchemeName): AppActionType => ({
+export const setColorScheme = (theme: ColorSchemeName): AppActionType => ({
   type: AppActionTypes.APP_THEME,
   payload: theme,
 });

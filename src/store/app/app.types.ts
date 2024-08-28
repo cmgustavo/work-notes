@@ -15,9 +15,9 @@ interface AppFailed {
   type: typeof AppActionTypes.APP_FAILED;
 }
 
-interface AppThemeAction {
+interface AppColorScheme {
   type: typeof AppActionTypes.APP_THEME;
   payload: ColorSchemeName;
 }
 
-export type AppActionType = AppSuccess | AppFailed | AppThemeAction;
+export type AppActionType = AppSuccess | AppFailed | AppColorScheme;

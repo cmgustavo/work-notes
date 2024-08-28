@@ -10,11 +10,18 @@ export const GlobalStyles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#fff',
     padding: 15,
     borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   itemText: {
     flex: 1,
     fontSize: 16,
+  },
+  subheader: {
+    padding: 10,
+    color: '#6e6e6e',
+    fontSize: 18,
   },
 });
