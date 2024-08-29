@@ -1,11 +1,12 @@
 import React, {useLayoutEffect, useEffect} from 'react';
+import {View} from 'react-native';
 import {
-  ActivityIndicator,
-  SafeAreaView,
-  TouchableOpacity,
+  useTheme,
+  FAB,
   Text,
-} from 'react-native';
-import {useTheme, FAB} from 'react-native-paper';
+  ActivityIndicator,
+  IconButton,
+} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
@@ -26,9 +27,11 @@ const Home = ({navigation}) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
-          <Icon name="cog" size={25} color={colors.primary} />
-        </TouchableOpacity>
+        <IconButton
+          icon="cog"
+          iconColor={colors.primary}
+          onPress={() => navigation.navigate('Preferences')}
+        />
       ),
     });
   }, [navigation, colors]);
@@ -38,7 +41,7 @@ const Home = ({navigation}) => {
   }, []);
 
   return (
-    <SafeAreaView
+    <View
       style={[
         ContainerStyles.globalContainer,
         {backgroundColor: colors.background},
@@ -61,14 +64,13 @@ const Home = ({navigation}) => {
         <>
           <List notes={notes} navigation={navigation} />
           <FAB
-            label="Add Note"
             icon="plus"
             style={GlobalStyles.fab}
             onPress={() => navigation.navigate('AddNote')}
           />
         </>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

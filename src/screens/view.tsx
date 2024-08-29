@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import moment from 'moment';
-import {SafeAreaView, Text, View} from 'react-native';
-import {useTheme, Button} from 'react-native-paper';
+import {View} from 'react-native';
+import {useTheme, Button, Text, Divider, Dialog} from 'react-native-paper';
 import {useAppDispatch} from '../store';
 import {deleteNote} from '../store/notes';
 
@@ -16,12 +16,17 @@ const ViewNote = ({route, navigation}) => {
   const dispatch = useAppDispatch();
   const {colors} = useTheme();
   let {id, text, date} = route.params;
+
+  const [visible, setVisible] = useState(false);
+  const confirmDelete = () => setVisible(true);
+  const cancelDelete = () => setVisible(false);
+
   const _delete = () => {
     dispatch(deleteNote(id));
     navigation.goBack();
   };
   return (
-    <SafeAreaView
+    <View
       style={[
         ContainerStyles.globalContainer,
         {backgroundColor: colors.background},
@@ -32,27 +37,40 @@ const ViewNote = ({route, navigation}) => {
           {backgroundColor: colors.background, borderColor: colors.background},
         ]}>
         <Text
-          style={[
-            TextStyles.title,
-            {color: colors.primary, borderColor: colors.surfaceVariant},
-          ]}>
+          variant="headlineSmall"
+          style={{marginBottom: 20, color: colors.primary}}>
           {moment(date).format('dddd, MMMM Do YYYY')}
         </Text>
-        <Text
-          style={[ContainerStyles.noteMainContent, {color: colors.primary}]}>
+        <Divider />
+        <Text style={{marginVertical: 30}} variant="bodyLarge">
           {text}
         </Text>
       </View>
       <View style={[GlobalStyles.bottom]}>
         <Button
-          color={colors.onSecondary}
           icon="delete"
-          mode="contained"
-          onPress={_delete}>
-          Delete Note
+          mode="contained-tonal"
+          textColor={colors.error}
+          onPress={confirmDelete}>
+          Delete
         </Button>
       </View>
-    </SafeAreaView>
+      <Dialog visible={visible} onDismiss={cancelDelete}>
+        <Dialog.Title>Confirm</Dialog.Title>
+        <Dialog.Content>
+          <Text variant="bodyMedium">You are going to delete this note.</Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button onPress={cancelDelete}>Cancel</Button>
+          <Button
+            mode="contained-tonal"
+            textColor={colors.error}
+            onPress={_delete}>
+            Delete
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </View>
   );
 };
 

@@ -6,20 +6,12 @@ export const ContainerStyles = StyleSheet.create({
   },
   notesContainer: {
     flex: 1,
-    paddingVertical: 20,
-    marginBottom: 20,
   },
   noteContainer: {
-    padding: 20,
-    marginHorizontal: 10,
-    marginBottom: 20,
-    borderBottomWidth: 1,
+    margin: 20,
   },
   noteMainContent: {
-    fontSize: 20,
-    fontWeight: '300',
-    marginBottom: 20,
-    marginTop: 20,
+    marginVertical: 20,
   },
   welcomeContainer: {
     flex: 1,

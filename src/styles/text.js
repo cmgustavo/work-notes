@@ -2,13 +2,10 @@ import {StyleSheet} from 'react-native';
 
 export const TextStyles = StyleSheet.create({
   noteTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    marginTop: 20,
   },
   noteContent: {
-    fontSize: 16,
-    marginBottom: 20,
+    marginTop: 20,
   },
   noteDate: {
     fontSize: 12,

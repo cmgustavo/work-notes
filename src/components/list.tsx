@@ -1,7 +1,14 @@
 import React from 'react';
 import moment from 'moment';
-import {TouchableOpacity, Text, FlatList, View} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import {TouchableOpacity, FlatList, View} from 'react-native';
+import {
+  useTheme,
+  Card,
+  Text,
+  Button,
+  Divider,
+  IconButton,
+} from 'react-native-paper';
 
 import {ContainerStyles, TextStyles} from '../styles';
 
@@ -16,33 +23,32 @@ const List = ({notes, navigation}: Props) => {
   const _renderItem = ({item}) => {
     const [_, itemData] = item;
     return (
-      <TouchableOpacity
-        style={[
-          ContainerStyles.noteContainer,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceVariant,
-          },
-        ]}
+      <Card
+        mode="contained"
         onPress={() => {
           navigation.push('ViewNote', {
             id: itemData.id,
             text: itemData.text,
             date: itemData.date,
           });
-        }}>
-        <View>
-          <Text style={[TextStyles.noteTitle, {color: colors.primary}]}>
-            {moment(itemData.date).format('dddd, MMMM Do YYYY')}
-          </Text>
-          <Text style={[TextStyles.noteContent, {color: colors.secondary}]}>
+        }}
+        style={[
+          ContainerStyles.noteContainer,
+          {backgroundColor: colors.surfaceVariant},
+        ]}>
+        <Card.Title
+          title={moment(itemData.date).format('dddd, MMMM Do YYYY')}
+          titleStyle={{color: colors.primary}}
+          subtitle={moment(itemData.date).fromNow()}
+          subtitleStyle={{color: colors.secondary}}
+        />
+        <Divider />
+        <Card.Content style={[ContainerStyles.noteMainContent]}>
+          <Text variant="bodyMedium" numberOfLines={2}>
             {itemData.text}
           </Text>
-          <Text style={[TextStyles.noteDate, {color: colors.primary}]}>
-            {moment(itemData.date).fromNow()}
-          </Text>
-        </View>
-      </TouchableOpacity>
+        </Card.Content>
+      </Card>
     );
   };
 

@@ -1,4 +1,5 @@
 import React, {useEffect} from 'react';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {useAppDispatch} from './store';
 import {initializeApp} from './store/app';
@@ -14,9 +15,11 @@ const App = () => {
   }, []);
 
   return (
-    <PreferencesProvider>
-      <MainNavigation />
-    </PreferencesProvider>
+    <SafeAreaProvider>
+      <PreferencesProvider>
+        <MainNavigation />
+      </PreferencesProvider>
+    </SafeAreaProvider>
   );
 };
 

@@ -1,25 +1,16 @@
-import React, {useState, useContext} from 'react';
-import {View, Text, TouchableOpacity, Appearance} from 'react-native';
-import {RadioButton, List} from 'react-native-paper';
-import {useAppDispatch, useAppSelector, RootState} from '../store';
-import {useTheme, Switch} from 'react-native-paper';
-import {useColorScheme, ColorSchemeName} from 'react-native';
+import React, {useState} from 'react';
+import {View} from 'react-native';
+import {useTheme, Divider, List, Text} from 'react-native-paper';
+import {ColorSchemeName} from 'react-native';
 
-import {
-  PreferencesContext,
-  usePreferences,
-} from '../context/PreferencesContext';
-import {ContainerStyles, GlobalStyles, TextStyles} from '../styles';
+import {usePreferences} from '../context/PreferencesContext';
+import {ContainerStyles} from '../styles';
 
 const Preferences = ({route, navigation}) => {
-  const dispatch = useAppDispatch();
   const theme = useTheme();
 
   const {colorTheme, setColorTheme} = usePreferences();
-  console.log('[preferences.tsx:16]', colorTheme); /* TODO */
-
   const [checked, setChecked] = useState(colorTheme);
-  console.log('[preferences.tsx:19]', checked); /* TODO */
 
   const handleThemeChange = (newTheme: ColorSchemeName) => {
     setColorTheme(newTheme);
@@ -33,63 +24,52 @@ const Preferences = ({route, navigation}) => {
         {backgroundColor: theme.colors.background},
       ]}>
       <List.Section>
-        <Text style={[TextStyles.optionsTitle, {color: theme.colors.primary}]}>
-          Theme
-        </Text>
-        <TouchableOpacity
+        <List.Subheader>
+          <Text variant="titleMedium">Theme Mode</Text>
+        </List.Subheader>
+        <List.Item
+          title="Light"
           onPress={() => handleThemeChange('light')}
-          style={[
-            GlobalStyles.itemContainer,
-            {
-              backgroundColor: theme.colors.background,
-              borderBottomColor: theme.colors.surfaceVariant,
-            },
-          ]}>
-          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
-            Light
-          </Text>
-          <RadioButton
-            value="light"
-            status={checked === 'light' ? 'checked' : 'unchecked'}
-            onPress={() => handleThemeChange('light')}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
+          right={props =>
+            checked === 'light' ? (
+              <List.Icon {...props} icon="checkbox-marked-circle-outline" />
+            ) : (
+              <List.Icon {...props} icon="checkbox-blank-circle-outline" />
+            )
+          }
+        />
+        <Divider />
+        <List.Item
+          title="Dark"
           onPress={() => handleThemeChange('dark')}
-          style={[
-            GlobalStyles.itemContainer,
-            {
-              backgroundColor: theme.colors.background,
-              borderBottomColor: theme.colors.surfaceVariant,
-            },
-          ]}>
-          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
-            Dark
-          </Text>
-          <RadioButton
-            value="dark"
-            status={checked === 'dark' ? 'checked' : 'unchecked'}
-            onPress={() => handleThemeChange('dark')}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
+          right={props =>
+            checked === 'dark' ? (
+              <List.Icon {...props} icon="checkbox-marked-circle-outline" />
+            ) : (
+              <List.Icon {...props} icon="checkbox-blank-circle-outline" />
+            )
+          }
+        />
+        <Divider />
+        <List.Item
+          title="System"
           onPress={() => handleThemeChange(null)}
-          style={[
-            GlobalStyles.itemContainer,
-            {
-              backgroundColor: theme.colors.background,
-              borderBottomColor: theme.colors.surfaceVariant,
-            },
-          ]}>
-          <Text style={[GlobalStyles.itemText, {color: theme.colors.primary}]}>
-            System
-          </Text>
-          <RadioButton
-            value="system"
-            status={!checked ? 'checked' : 'unchecked'}
-            onPress={() => handleThemeChange(null)}
-          />
-        </TouchableOpacity>
+          right={props =>
+            !checked ? (
+              <List.Icon {...props} icon="checkbox-marked-circle-outline" />
+            ) : (
+              <List.Icon {...props} icon="checkbox-blank-circle-outline" />
+            )
+          }
+        />
+        <Divider />
+      </List.Section>
+      <List.Section>
+        <List.Subheader>
+          <Text variant="titleMedium">About</Text>
+        </List.Subheader>
+        <List.Item title="Version" right={props => <Text>0.0.1</Text>} />
+        <Divider />
       </List.Section>
     </View>
   );
