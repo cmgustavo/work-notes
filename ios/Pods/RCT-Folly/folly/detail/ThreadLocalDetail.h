@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,25 +33,13 @@
 #include <folly/ScopeGuard.h>
 #include <folly/SharedMutex.h>
 #include <folly/container/Foreach.h>
-#include <folly/detail/AtFork.h>
 #include <folly/detail/StaticSingletonManager.h>
 #include <folly/lang/Exception.h>
 #include <folly/memory/Malloc.h>
 #include <folly/portability/PThread.h>
 #include <folly/synchronization/MicroSpinLock.h>
+#include <folly/system/AtFork.h>
 #include <folly/system/ThreadId.h>
-
-// In general, emutls cleanup is not guaranteed to play nice with the way
-// StaticMeta mixes direct pthread calls and the use of __thread. This has
-// caused problems on multiple platforms so don't use __thread there.
-//
-// XXX: Ideally we would instead determine if emutls is in use at runtime as it
-// is possible to configure glibc on Linux to use emutls regardless.
-#if !FOLLY_MOBILE && !defined(__APPLE__) && !defined(_MSC_VER)
-#define FOLLY_TLD_USE_FOLLY_TLS 1
-#else
-#undef FOLLY_TLD_USE_FOLLY_TLS
-#endif
 
 namespace folly {
 
@@ -299,6 +287,14 @@ class PthreadKeyUnregister {
 };
 
 struct StaticMetaBase {
+  // In general, emutls cleanup is not guaranteed to play nice with the way
+  // StaticMeta mixes direct pthread calls and the use of __thread. This has
+  // caused problems on multiple platforms so don't use __thread there.
+  //
+  // XXX: Ideally we would instead determine if emutls is in use at runtime as
+  // it is possible to configure glibc on Linux to use emutls regardless.
+  static constexpr bool kUseThreadLocal = !kIsMobile && !kIsApple && !kMscVer;
+
   // Represents an ID of a thread local object. Initially set to the maximum
   // uint. This representation allows us to avoid a branch in accessing TLS data
   // (because if you test capacity > id if id = maxint then the test will always
@@ -398,7 +394,7 @@ struct FOLLY_EXPORT StaticMeta final : StaticMetaBase {
       : StaticMetaBase(
             &StaticMeta::getThreadEntrySlow,
             std::is_same<AccessMode, AccessModeStrict>::value) {
-    detail::AtFork::registerHandler(
+    AtFork::registerHandler(
         this,
         /*prepare*/ &StaticMeta::preFork,
         /*parent*/ &StaticMeta::onForkParent,
@@ -415,13 +411,15 @@ struct FOLLY_EXPORT StaticMeta final : StaticMetaBase {
     // Eliminate as many branches and as much extra code as possible in the
     // cached fast path, leaving only one branch here and one indirection below.
     uint32_t id = ent->getOrInvalid();
-#ifdef FOLLY_TLD_USE_FOLLY_TLS
-    static thread_local ThreadEntry* threadEntry{};
-    static thread_local size_t capacity{};
-#else
-    ThreadEntry* threadEntry{};
-    size_t capacity{};
-#endif
+
+    static thread_local ThreadEntry* threadEntryTL{};
+    ThreadEntry* threadEntryNonTL{};
+    auto& threadEntry = kUseThreadLocal ? threadEntryTL : threadEntryNonTL;
+
+    static thread_local size_t capacityTL{};
+    size_t capacityNonTL{};
+    auto& capacity = kUseThreadLocal ? capacityTL : capacityNonTL;
+
     if (FOLLY_UNLIKELY(capacity <= id)) {
       getSlowReserveAndCache(ent, id, threadEntry, capacity);
     }
@@ -447,12 +445,12 @@ struct FOLLY_EXPORT StaticMeta final : StaticMetaBase {
         static_cast<ThreadEntry*>(pthread_getspecific(key));
     if (!threadEntry) {
       ThreadEntryList* threadEntryList = StaticMeta::getThreadEntryList();
-#ifdef FOLLY_TLD_USE_FOLLY_TLS
-      static thread_local ThreadEntry threadEntrySingleton;
-      threadEntry = &threadEntrySingleton;
-#else
-      threadEntry = new ThreadEntry();
-#endif
+      if (kUseThreadLocal) {
+        static thread_local ThreadEntry threadEntrySingleton;
+        threadEntry = &threadEntrySingleton;
+      } else {
+        threadEntry = new ThreadEntry();
+      }
       // if the ThreadEntry already exists
       // but pthread_getspecific returns NULL
       // do not add the same entry twice to the list

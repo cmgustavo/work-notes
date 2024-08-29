@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/Traits.h>
 #include <folly/functional/Invoke.h>
+#include <folly/lang/Hint.h>
 #include <folly/portability/GFlags.h>
 
 #include <cassert>
@@ -36,6 +37,7 @@
 #include <glog/logging.h>
 
 DECLARE_bool(benchmark);
+DECLARE_uint32(bm_result_width_chars);
 
 namespace folly {
 
@@ -115,7 +117,12 @@ struct BenchmarkSuspender {
   using TimePoint = Clock::time_point;
   using Duration = Clock::duration;
 
-  BenchmarkSuspender() { start = Clock::now(); }
+  struct DismissedTag {};
+  static inline constexpr DismissedTag Dismissed{};
+
+  BenchmarkSuspender() : start(Clock::now()) {}
+
+  explicit BenchmarkSuspender(DismissedTag) : start(TimePoint{}) {}
 
   BenchmarkSuspender(const BenchmarkSuspender&) = delete;
   BenchmarkSuspender(BenchmarkSuspender&& rhs) noexcept {

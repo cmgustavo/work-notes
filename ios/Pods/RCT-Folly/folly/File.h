@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ class File {
   static Expected<File, exception_wrapper> makeFile(Args&&... args) noexcept {
     try {
       return File(std::forward<Args>(args)...);
-    } catch (const std::system_error& se) {
-      return makeUnexpected(exception_wrapper(std::current_exception(), se));
+    } catch (const std::system_error&) {
+      return makeUnexpected(exception_wrapper(std::current_exception()));
     }
   }
 

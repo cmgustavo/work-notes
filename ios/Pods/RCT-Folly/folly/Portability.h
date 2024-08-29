@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@
 static_assert(FOLLY_CPLUSPLUS >= 201402L, "__cplusplus >= 201402L");
 
 #if defined(__GNUC__) && !defined(__clang__)
-static_assert(__GNUC__ >= 5, "__GNUC__ >= 5");
+static_assert(__GNUC__ >= 7, "__GNUC__ >= 5");
 #endif
 
 // Unaligned loads and stores
 namespace folly {
-#if FOLLY_HAVE_UNALIGNED_ACCESS
+#if defined(FOLLY_HAVE_UNALIGNED_ACCESS) && FOLLY_HAVE_UNALIGNED_ACCESS
 constexpr bool kHasUnalignedAccess = true;
 #else
 constexpr bool kHasUnalignedAccess = false;
@@ -46,7 +46,7 @@ constexpr bool kHasUnalignedAccess = false;
 // msvc should come first, so if clang is in msvc mode it gets the right defines
 
 // NOTE: this will only do checking in msvc with versions that support /analyze
-#if _MSC_VER
+#ifdef _MSC_VER
 #ifdef _USE_ATTRIBUTES_FOR_SAL
 #undef _USE_ATTRIBUTES_FOR_SAL
 #endif
@@ -137,19 +137,25 @@ constexpr bool kIsLibrarySanitizeAddress = true;
 constexpr bool kIsLibrarySanitizeAddress = false;
 #endif
 
-#if FOLLY_SANITIZE_ADDRESS
+#ifdef FOLLY_SANITIZE_ADDRESS
 constexpr bool kIsSanitizeAddress = true;
 #else
 constexpr bool kIsSanitizeAddress = false;
 #endif
 
-#if FOLLY_SANITIZE_THREAD
+#ifdef FOLLY_SANITIZE_THREAD
 constexpr bool kIsSanitizeThread = true;
 #else
 constexpr bool kIsSanitizeThread = false;
 #endif
 
-#if FOLLY_SANITIZE
+#ifdef FOLLY_SANITIZE_DATAFLOW
+constexpr bool kIsSanitizeDataflow = true;
+#else
+constexpr bool kIsSanitizeDataflow = false;
+#endif
+
+#ifdef FOLLY_SANITIZE
 constexpr bool kIsSanitize = true;
 #else
 constexpr bool kIsSanitize = false;
@@ -217,32 +223,10 @@ constexpr bool kIsSanitize = false;
 #define FOLLY_GCC_DISABLE_NEW_SHADOW_WARNINGS /* empty */
 #endif
 
-/* Platform specific TLS support
- * gcc implements __thread
- * msvc implements __declspec(thread)
- * the semantics are the same
- * (but remember __thread has different semantics when using emutls (ex. apple))
- */
-#if defined(_MSC_VER)
-#define FOLLY_TLS __declspec(thread)
-#elif defined(__GNUC__)
-#define FOLLY_TLS __thread
-#else
-#error cannot define platform specific thread local storage
-#endif
-
-// disable FOLLY_TLS on 32 bit Apple/iOS
-#if defined(__APPLE__) && FOLLY_MOBILE
-#if (__SIZEOF_POINTER__ == 4)
-#undef FOLLY_TLS
-#endif
-#endif
-
 // It turns out that GNU libstdc++ and LLVM libc++ differ on how they implement
 // the 'std' namespace; the latter uses inline namespaces. Wrap this decision
 // up in a macro to make forward-declarations easier.
-#if FOLLY_USE_LIBCPP
-#include <__config> // @manual
+#if defined(_LIBCPP_VERSION)
 #define FOLLY_NAMESPACE_STD_BEGIN _LIBCPP_BEGIN_NAMESPACE_STD
 #define FOLLY_NAMESPACE_STD_END _LIBCPP_END_NAMESPACE_STD
 #else
@@ -252,7 +236,7 @@ constexpr bool kIsSanitize = false;
 
 // If the new c++ ABI is used, __cxx11 inline namespace needs to be added to
 // some types, e.g. std::list.
-#if _GLIBCXX_USE_CXX11_ABI
+#if defined(_GLIBCXX_USE_CXX11_ABI) && _GLIBCXX_USE_CXX11_ABI
 #define FOLLY_GLIBCXX_NAMESPACE_CXX11_BEGIN \
   inline _GLIBCXX_BEGIN_NAMESPACE_CXX11
 #define FOLLY_GLIBCXX_NAMESPACE_CXX11_END _GLIBCXX_END_NAMESPACE_CXX11
@@ -276,7 +260,10 @@ constexpr bool kIsSanitize = false;
 // SSE4.2 intrinsics unless -march argument is specified.
 // So cannot unconditionally define __SSE4_2__ in clang.
 #ifndef __clang__
+#if !defined(_M_ARM) && !defined(_M_ARM64)
 #define __SSE4_2__ 1
+#endif // !defined(_M_ARM) && !defined(_M_ARM64)
+
 // compiler specific to compiler specific
 // nolint
 #define __PRETTY_FUNCTION__ __FUNCSIG__
@@ -285,10 +272,11 @@ constexpr bool kIsSanitize = false;
 #endif
 
 // Define FOLLY_HAS_EXCEPTIONS
-#if __cpp_exceptions >= 199711 || FOLLY_HAS_FEATURE(cxx_exceptions)
+#if (defined(__cpp_exceptions) && __cpp_exceptions >= 199711) || \
+    FOLLY_HAS_FEATURE(cxx_exceptions)
 #define FOLLY_HAS_EXCEPTIONS 1
 #elif __GNUC__
-#if __EXCEPTIONS
+#if defined(__EXCEPTIONS) && __EXCEPTIONS
 #define FOLLY_HAS_EXCEPTIONS 1
 #else // __EXCEPTIONS
 #define FOLLY_HAS_EXCEPTIONS 0
@@ -384,6 +372,8 @@ constexpr auto kHasWeakSymbols = false;
 #ifndef FOLLY_NEON
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #define FOLLY_NEON 1
+#else
+#define FOLLY_NEON 0
 #endif
 #endif
 
@@ -441,7 +431,7 @@ constexpr bool const kHasRtti = FOLLY_HAS_RTTI;
 
 namespace folly {
 
-#if __OBJC__
+#ifdef __OBJC__
 constexpr auto kIsObjC = true;
 #else
 constexpr auto kIsObjC = false;
@@ -476,31 +466,37 @@ constexpr bool kIsAppleMacOS = FOLLY_APPLE_MACOS == 1;
 constexpr bool kIsAppleTVOS = FOLLY_APPLE_TVOS == 1;
 constexpr bool kIsAppleWatchOS = FOLLY_APPLE_WATCHOS == 1;
 
-#if __GLIBCXX__
+#if defined(__GLIBCXX__)
 constexpr auto kIsGlibcxx = true;
 #else
 constexpr auto kIsGlibcxx = false;
 #endif
 
-#if __GLIBCXX__ && _GLIBCXX_RELEASE // major version, 7+
+#if defined(__GLIBCXX__) && _GLIBCXX_RELEASE // major version, 7+
 constexpr auto kGlibcxxVer = _GLIBCXX_RELEASE;
 #else
 constexpr auto kGlibcxxVer = 0;
 #endif
 
-#if _LIBCPP_VERSION
+#if defined(__GLIBCXX__) && defined(_GLIBCXX_ASSERTIONS)
+constexpr auto kGlibcxxAssertions = true;
+#else
+constexpr auto kGlibcxxAssertions = false;
+#endif
+
+#ifdef _LIBCPP_VERSION
 constexpr auto kIsLibcpp = true;
 #else
 constexpr auto kIsLibcpp = false;
 #endif
 
-#if FOLLY_USE_LIBSTDCPP
+#if defined(__GLIBCXX__)
 constexpr auto kIsLibstdcpp = true;
 #else
 constexpr auto kIsLibstdcpp = false;
 #endif
 
-#if _MSC_VER
+#ifdef _MSC_VER
 constexpr auto kMscVer = _MSC_VER;
 #else
 constexpr auto kMscVer = 0;
@@ -520,7 +516,7 @@ constexpr auto kIsClang = false;
 constexpr auto kClangVerMajor = 0;
 #endif
 
-#if FOLLY_MICROSOFT_ABI_VER
+#ifdef FOLLY_MICROSOFT_ABI_VER
 constexpr auto kMicrosoftAbiVer = FOLLY_MICROSOFT_ABI_VER;
 #else
 constexpr auto kMicrosoftAbiVer = 0;
@@ -528,7 +524,7 @@ constexpr auto kMicrosoftAbiVer = 0;
 
 // cpplib is an implementation of the standard library, and is the one typically
 // used with the msvc compiler
-#if _CPPLIB_VER
+#ifdef _CPPLIB_VER
 constexpr auto kCpplibVer = _CPPLIB_VER;
 #else
 constexpr auto kCpplibVer = 0;
@@ -546,15 +542,38 @@ constexpr auto kCpplibVer = 0;
 //    FOLLY_STORAGE_CONSTEXPR int const num = 3;
 //
 //  True as of MSVC 2017.
-#if _MSC_VER
+#ifdef _MSC_VER
 #define FOLLY_STORAGE_CONSTEXPR
 #else
 #define FOLLY_STORAGE_CONSTEXPR constexpr
 #endif
 
+//  FOLLY_CXX17_CONSTEXPR
+//
+//  C++17 permits more cases to be marked constexpr, including lambda bodies and
+//  the `if` keyword.
+#if FOLLY_CPLUSPLUS >= 201703L
+#define FOLLY_CXX17_CONSTEXPR constexpr
+#else
+#define FOLLY_CXX17_CONSTEXPR
+#endif
+
+// C++20 constinit
+#if defined(__cpp_constinit) && __cpp_constinit >= 201907L
+#define FOLLY_CONSTINIT constinit
+#else
+#define FOLLY_CONSTINIT
+#endif
+
+#if defined(FOLLY_CFG_NO_COROUTINES)
+#define FOLLY_HAS_COROUTINES 0
+#else
 #if __cplusplus >= 201703L
 // folly::coro requires C++17 support
-#if defined(_WIN32) && defined(__clang__) && !defined(LLVM_COROUTINES)
+#if defined(__NVCC__)
+// For now, NVCC matches other compilers but does not offer coroutines.
+#define FOLLY_HAS_COROUTINES 0
+#elif defined(_WIN32) && defined(__clang__) && !defined(LLVM_COROUTINES)
 // LLVM and MSVC coroutines are ABI incompatible, so for the MSVC implementation
 // of <experimental/coroutine> on Windows we *don't* have coroutines.
 //
@@ -581,6 +600,7 @@ constexpr auto kCpplibVer = 0;
 #else
 #define FOLLY_HAS_COROUTINES 0
 #endif // __cplusplus >= 201703L
+#endif // FOLLY_CFG_NO_COROUTINES
 
 // MSVC 2017.5 && C++17
 #if __cpp_noexcept_function_type >= 201510 || \

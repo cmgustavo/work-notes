@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ using FixedStringBase = FixedStringBase_<>;
 // it's testing for fails. In this way, precondition violations are reported
 // at compile-time instead of at runtime.
 [[noreturn]] inline void assertOutOfBounds() {
-  assert(!"Array index out of bounds in BasicFixedString");
+  assert(false && "Array index out of bounds in BasicFixedString");
   throw_exception<std::out_of_range>(
       "Array index out of bounds in BasicFixedString");
 }
@@ -89,7 +89,9 @@ constexpr std::size_t checkOverflowIfDebug(std::size_t i, std::size_t size) {
 
 // Intentionally NOT constexpr. See note above for assertOutOfBounds
 [[noreturn]] inline void assertNotNullTerminated() noexcept {
-  assert(!"Non-null terminated string used to initialize a BasicFixedString");
+  assert(
+      false &&
+      "Non-null terminated string used to initialize a BasicFixedString");
   std::terminate(); // Fail hard, fail fast.
 }
 
@@ -393,7 +395,8 @@ struct ReverseIterator {
 } // namespace detail
 
 // Defined in folly/hash/Hash.h
-std::uint32_t hsieh_hash32_buf(const void* buf, std::size_t len);
+std::uint32_t hsieh_hash32_buf_constexpr(
+    const unsigned char* buf, std::size_t len);
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
  * \class BasicFixedString
@@ -667,6 +670,21 @@ class BasicFixedString : private detail::fixedstring::FixedStringBase {
       false)
       : BasicFixedString{
             that, detail::fixedstring::checkOverflow(count, N), Indices{}} {}
+
+#if FOLLY_HAS_STRING_VIEW
+  /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+   * Construct from a `std::basic_string_view<Char>`
+   * \param that The source basic_string_view
+   * \pre `that.size() <= N`
+   * \post `size() == that.size()`
+   * \post `0 == strncmp(data(), that.begin(), size())`
+   * \post `at(size()) == Char(0)`
+   * \throw std::out_of_range when that.size() > N
+   */
+  constexpr /* implicit */ BasicFixedString(
+      std::basic_string_view<Char> that) noexcept(false)
+      : BasicFixedString{that.data(), that.size()} {}
+#endif
 
   /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
    * Construct an BasicFixedString that contains `count` characters, all
@@ -1026,10 +1044,8 @@ class BasicFixedString : private detail::fixedstring::FixedStringBase {
    */
   static constexpr std::size_t max_size() noexcept { return N; }
 
-  // We would need to reimplement folly::Hash to make this
-  // constexpr. :-(
-  std::uint32_t hash() const noexcept {
-    return folly::hsieh_hash32_buf(data_, size_);
+  constexpr std::uint32_t hash() const noexcept {
+    return folly::hsieh_hash32_buf_constexpr(data_, size_);
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 #pragma once
 #include <array>
 #include <atomic>
+#include <iterator>
+#include <memory>
 #include <stdexcept>
+#include <folly/detail/StaticSingletonManager.h>
 
 #include <folly/Format.h>
 #include <folly/Function.h>
-#include <folly/Optional.h>
 #include <folly/SharedMutex.h>
 
 namespace folly {
@@ -63,7 +65,7 @@ namespace folly {
 //
 // Implementation/Overhead Notes:
 //
-// By design, adding ConstructorCallback() to an object shoud be very light
+// By design, adding ConstructorCallback() to an object should be very light
 // weight.  From a memory context, this adds 1 byte of memory to the parent
 // class. From a CPU/performance perspective, the constructor does a load of an
 // atomic int and the cost of the actual callbacks themselves.  So if this
@@ -83,18 +85,33 @@ class ConstructorCallback {
 
   using NewConstructorCallback = folly::Function<void(T*)>;
   using This = ConstructorCallback<T, MaxCallbacks>;
+  using CallbackArray =
+      std::array<typename This::NewConstructorCallback, MaxCallbacks>;
 
   explicit ConstructorCallback(T* t) {
+    // This code depends on the C++ standard where values that are
+    // initialized to zero ("Zero Initiation") are initialized before any more
+    // complex static pre-main() dynamic initialization - see
+    // https://en.cppreference.com/w/cpp/language/initialization) for
+    // more details.
+    //
+    // This assumption prevents a subtle initialization race condition
+    // where something could call this code pre-main() before
+    // nConstructorCallbacks_ was set to zero, and thus prevents issuing
+    // callbacks on garbage data.
+
+    auto nCBs =
+        This::global().nConstructorCallbacks_.load(std::memory_order_acquire);
+
     // fire callbacks to inform listeners about the new constructor
-    auto nCBs = This::nConstructorCallbacks_.load(std::memory_order_acquire);
     /****
      * We don't need the full lock here, just the atomic int to tell us
      * how far into the array to go/how many callbacks are registered
      *
-     * NOTE that nCBs > 0 will always imply that callbacks_ is non-nullopt
+     * NOTE that nCBs > 0 will always imply that callbacks_ is non-nullptr
      */
-    for (int i = 0; i < nCBs; i++) {
-      This::callbacks_.value()[i](t);
+    for (size_t i = 0; i < nCBs; i++) {
+      (This::global().callbacks_)[i](t);
     }
   }
 
@@ -115,45 +132,31 @@ class ConstructorCallback {
    * @throw std::length_error() if this callback would exceed our max
    */
   static void addNewConstructorCallback(NewConstructorCallback cb) {
-    std::lock_guard<SharedMutex> g(This::getMutex());
-    auto idx = nConstructorCallbacks_.load(std::memory_order_acquire);
-    if (!callbacks_) {
-      // initialize the array if unallocated
-      callbacks_.emplace(
-          std::array<This::NewConstructorCallback, MaxCallbacks>());
-    }
-    if (idx >= callbacks_.value().size()) {
+    // Ensure that a single callback is added at a time
+    std::lock_guard<SharedMutex> g(This::global().mutex_);
+    auto idx =
+        This::global().nConstructorCallbacks_.load(std::memory_order_acquire);
+
+    if (idx >= (This::global().callbacks_).size()) {
       throw std::length_error(
           folly::sformat("Too many callbacks - max {}", MaxCallbacks));
     }
-    callbacks_.value()[idx] = std::move(cb);
+    (This::global().callbacks_)[idx] = std::move(cb);
     // Only increment nConstructorCallbacks_ after fully initializing the array
     // entry. This step makes the new array entry visible to other threads.
-    nConstructorCallbacks_.store(idx + 1, std::memory_order_release);
+    This::global().nConstructorCallbacks_.store(
+        idx + 1, std::memory_order_release);
   }
 
  private:
-  // allocate an array internal to function to avoid init() races
-  static folly::Optional<std::array<NewConstructorCallback, MaxCallbacks>>
-      callbacks_;
-  static folly::SharedMutex& getMutex();
-  static std::atomic<int> nConstructorCallbacks_;
+  // use createGlobal to avoid races on shutdown
+  struct GlobalStorage {
+    folly::SharedMutex mutex_;
+    This::CallbackArray callbacks_{};
+    std::atomic<size_t> nConstructorCallbacks_{0};
+  };
+  static auto& global() {
+    return folly::detail::createGlobal<GlobalStorage, void>();
+  }
 };
-
-template <class T, std::size_t MaxCallbacks>
-std::atomic<int> ConstructorCallback<T, MaxCallbacks>::nConstructorCallbacks_{
-    0};
-
-template <class T, std::size_t MaxCallbacks>
-folly::SharedMutex& ConstructorCallback<T, MaxCallbacks>::getMutex() {
-  static folly::SharedMutex mutex;
-  return mutex;
-}
-
-template <class T, std::size_t MaxCallbacks>
-folly::Optional<std::array<
-    typename ConstructorCallback<T, MaxCallbacks>::NewConstructorCallback,
-    MaxCallbacks>>
-    ConstructorCallback<T, MaxCallbacks>::callbacks_{folly::none};
-
 } // namespace folly

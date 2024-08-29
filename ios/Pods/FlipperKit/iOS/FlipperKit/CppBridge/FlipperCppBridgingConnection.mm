@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -25,10 +25,22 @@
 
 #pragma mark - SonarConnection
 
-- (void)send:(NSString*)method withParams:(NSDictionary*)params {
+- (void)sendInternal:(NSString*)method withParams:(id)params {
   conn_->send(
       [method UTF8String],
       facebook::cxxutils::convertIdToFollyDynamic(params, true));
+}
+
+- (void)send:(NSString*)method withParams:(NSDictionary*)params {
+  [self sendInternal:method withParams:params];
+}
+
+- (void)send:(NSString*)method withRawParams:(NSString*)params {
+  conn_->sendRaw([method UTF8String], [params UTF8String]);
+}
+
+- (void)send:(NSString*)method withArrayParams:(NSArray*)params {
+  [self sendInternal:method withParams:params];
 }
 
 - (void)receive:(NSString*)method withBlock:(SonarReceiver)receiver {

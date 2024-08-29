@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <sstream>
 #include <type_traits>
 
 #include <boost/algorithm/string.hpp>
@@ -54,21 +55,66 @@ parse_error make_parse_error(
 }
 
 struct Printer {
+  // Context class is allows to restore the path to element that we are about to
+  // print so that if error happens we can throw meaningful exception.
+  class Context {
+   public:
+    Context(const Context* parent_context, const dynamic& key)
+        : parent_context_(parent_context), key_(key), is_key_(false) {}
+    Context(const Context* parent_context, const dynamic& key, bool is_key)
+        : parent_context_(parent_context), key_(key), is_key_(is_key) {}
+
+    // Return location description of a context as a chain of keys
+    // ex., '"outherKey"->"innerKey"'.
+    std::string locationDescription() const {
+      std::vector<std::string> keys;
+      const Context* ptr = parent_context_;
+      while (ptr) {
+        keys.push_back(ptr->getName());
+        ptr = ptr->parent_context_;
+      }
+      keys.push_back(getName());
+      std::ostringstream stream;
+      std::reverse_copy(
+          keys.begin(),
+          keys.end() - 1,
+          std::ostream_iterator<std::string>(stream, "->"));
+
+      // Add current key.
+      stream << keys.back();
+      return stream.str();
+    }
+    std::string getName() const {
+      return Printer::toStringOr(key_, "<unprintable>");
+    }
+    std::string typeDescription() const { return is_key_ ? "key" : "value"; }
+
+   private:
+    const Context* const parent_context_;
+    const dynamic& key_;
+    bool is_key_;
+  };
+
   explicit Printer(
       std::string& out, unsigned* indentLevel, serialization_opts const* opts)
       : out_(out), indentLevel_(indentLevel), opts_(*opts) {}
 
-  void operator()(dynamic const& v) const {
+  void operator()(dynamic const& v, const Context& context) const {
+    (*this)(v, &context);
+  }
+  void operator()(dynamic const& v, const Context* context) const {
     switch (v.type()) {
       case dynamic::DOUBLE:
         if (!opts_.allow_nan_inf) {
           if (std::isnan(v.asDouble())) {
             throw json::print_error(
-                "folly::toJson: JSON object value was a NaN");
+                "folly::toJson: JSON object value was a NaN when serializing " +
+                contextDescription(context));
           }
           if (std::isinf(v.asDouble())) {
             throw json::print_error(
-                "folly::toJson: JSON object value was an INF");
+                "folly::toJson: JSON object value was an INF when serializing " +
+                contextDescription(context));
           }
         }
         toAppend(
@@ -91,13 +137,13 @@ struct Printer {
         out_ += "null";
         break;
       case dynamic::STRING:
-        escapeString(v.asString(), out_, opts_);
+        escapeString(v.stringPiece(), out_, opts_);
         break;
       case dynamic::OBJECT:
-        printObject(v);
+        printObject(v, context);
         break;
       case dynamic::ARRAY:
-        printArray(v);
+        printArray(v, context);
         break;
       default:
         CHECK(0) << "Bad type " << v.type();
@@ -105,28 +151,48 @@ struct Printer {
   }
 
  private:
-  void printKV(const std::pair<const dynamic, dynamic>& p) const {
-    if (!opts_.allow_non_string_keys && !p.first.isString()) {
+  void printKV(
+      dynamic const& o,
+      const std::pair<const dynamic, dynamic>& p,
+      const Context* context) const {
+    if (opts_.convert_int_keys && p.first.isInt()) {
+      auto strKey = p.first.asString();
+      if (o.count(strKey)) {
+        throw json::print_error(folly::to<std::string>(
+            "folly::toJson: Source object has integer and string keys "
+            "representing the same value: ",
+            p.first.asInt()));
+      }
+      (*this)(p.first.asString(), Context(context, p.first, true));
+    } else if (!opts_.allow_non_string_keys && !p.first.isString()) {
       throw json::print_error(
-          "folly::toJson: JSON object key was not a "
-          "string");
+          "folly::toJson: JSON object key " +
+          toStringOr(p.first, "<unprintable key>") + " was not a string " +
+          (opts_.convert_int_keys ? "or integer " : "") +
+          "when serializing key at " +
+          Context(context, p.first, true).locationDescription());
+    } else {
+      (*this)(p.first, Context(context, p.first, true)); // Key
     }
-    (*this)(p.first);
     mapColon();
-    (*this)(p.second);
+    (*this)(p.second, Context(context, p.first, false)); // Value
   }
 
   template <typename Iterator>
-  void printKVPairs(Iterator begin, Iterator end) const {
-    printKV(*begin);
+  void printKVPairs(
+      dynamic const& o,
+      Iterator begin,
+      Iterator end,
+      const Context* context) const {
+    printKV(o, *begin, context);
     for (++begin; begin != end; ++begin) {
       out_ += ',';
       newline();
-      printKV(*begin);
+      printKV(o, *begin, context);
     }
   }
 
-  void printObject(dynamic const& o) const {
+  void printObject(dynamic const& o, const Context* context) const {
     if (o.empty()) {
       out_ += "{}";
       return;
@@ -149,16 +215,38 @@ struct Printer {
       } else {
         sort_keys_by(refs.begin(), refs.end(), std::less<>());
       }
-      printKVPairs(refs.cbegin(), refs.cend());
+      printKVPairs(o, refs.cbegin(), refs.cend(), context);
     } else {
-      printKVPairs(o.items().begin(), o.items().end());
+      printKVPairs(o, o.items().begin(), o.items().end(), context);
     }
     outdent();
     newline();
     out_ += '}';
   }
 
-  void printArray(dynamic const& a) const {
+  static std::string toStringOr(dynamic const& v, const char* placeholder) {
+    try {
+      std::string result;
+      unsigned indentLevel = 0;
+      serialization_opts opts;
+      opts.allow_nan_inf = true;
+      opts.allow_non_string_keys = true;
+      Printer printer(result, &indentLevel, &opts);
+      printer(v, nullptr);
+      return result;
+    } catch (...) {
+      return placeholder;
+    }
+  }
+
+  static std::string contextDescription(const Context* context) {
+    if (!context) {
+      return "<undefined location>";
+    }
+    return context->typeDescription() + " at " + context->locationDescription();
+  }
+
+  void printArray(dynamic const& a, const Context* context) const {
     if (a.empty()) {
       out_ += "[]";
       return;
@@ -167,11 +255,11 @@ struct Printer {
     out_ += '[';
     indent();
     newline();
-    (*this)(a[0]);
-    for (auto& val : range(std::next(a.begin()), a.end())) {
+    (*this)(a[0], Context(context, dynamic(0)));
+    for (auto it = std::next(a.begin()); it != a.end(); ++it) {
       out_ += ',';
       newline();
-      (*this)(val);
+      (*this)(*it, Context(context, dynamic(std::distance(a.begin(), it))));
     }
     outdent();
     newline();
@@ -316,7 +404,7 @@ struct Input {
     return range_.subpiece(0, 16 /* arbitrary */).toString();
   }
 
-  dynamic error(char const* what) const {
+  [[noreturn]] dynamic error(char const* what) const {
     throw json::make_parse_error(lineNum_, context(), what);
   }
 
@@ -358,25 +446,29 @@ dynamic parseValue(Input& in, json::metadata_map* map);
 std::string parseString(Input& in);
 dynamic parseNumber(Input& in);
 
-template <class K>
 void parseObjectKeyValue(
-    Input& in, dynamic& ret, K&& key, json::metadata_map* map) {
+    Input& in,
+    dynamic& ret,
+    dynamic&& key,
+    json::metadata_map* map,
+    bool distinct) {
   auto keyLineNumber = in.getLineNum();
   in.skipWhitespace();
   in.expect(':');
   in.skipWhitespace();
-  K tmp;
-  if (map) {
-    tmp = K(key);
-  }
   auto valueLineNumber = in.getLineNum();
-  ret.insert(std::forward<K>(key), parseValue(in, map));
+  auto value = parseValue(in, map);
+  auto [it, inserted] = ret.try_emplace(std::move(key), std::move(value));
+  if (!inserted) {
+    if (distinct) {
+      in.error("duplicate key inserted");
+    }
+    it->second = std::move(value);
+  }
   if (map) {
-    auto val = ret.get_ptr(tmp);
-    // We just inserted it, so it should be there!
-    DCHECK(val != nullptr);
     map->emplace(
-        val, json::parse_metadata{{{keyLineNumber}}, {{valueLineNumber}}});
+        &it->second,
+        json::parse_metadata{{{keyLineNumber}}, {{valueLineNumber}}});
   }
 }
 
@@ -392,19 +484,21 @@ dynamic parseObject(Input& in, json::metadata_map* map) {
     return ret;
   }
 
+  const auto& opts = in.getOpts();
+  const bool distinct = opts.validate_keys || opts.convert_int_keys;
   for (;;) {
-    if (in.getOpts().allow_trailing_comma && *in == '}') {
+    if (opts.allow_trailing_comma && *in == '}') {
       break;
     }
-    if (*in == '\"') { // string
-      auto key = parseString(in);
-      parseObjectKeyValue(in, ret, std::move(key), map);
-    } else if (!in.getOpts().allow_non_string_keys) {
-      in.error("expected string for object key name");
-    } else {
-      auto key = parseValue(in, map);
-      parseObjectKeyValue(in, ret, std::move(key), map);
+    dynamic key = parseValue(in, map);
+    if (opts.convert_int_keys && key.isInt()) {
+      key = key.asString();
+    } else if (!opts.allow_non_string_keys && !key.isString()) {
+      in.error(
+          opts.convert_int_keys ? "expected string or integer for object key"
+                                : "expected string for object key");
     }
+    parseObjectKeyValue(in, ret, std::move(key), map, distinct);
 
     in.skipWhitespace();
     if (*in != ',') {
@@ -473,19 +567,19 @@ dynamic parseNumber(Input& in) {
 
   auto const wasE = *in == 'e' || *in == 'E';
 
-  constexpr const char* maxInt = "9223372036854775807";
-  constexpr const char* minInt = "-9223372036854775808";
-  constexpr auto maxIntLen = constexpr_strlen(maxInt);
-  constexpr auto minIntLen = constexpr_strlen(minInt);
-
   if (*in != '.' && !wasE && in.getOpts().parse_numbers_as_strings) {
     return integral;
   }
 
+  constexpr const char* maxIntStr = "9223372036854775807";
+  constexpr const char* minIntStr = "-9223372036854775808";
+  constexpr auto maxIntLen = constexpr_strlen(maxIntStr);
+  constexpr auto minIntLen = constexpr_strlen(minIntStr);
+  auto extremaLen = negative ? minIntLen : maxIntLen;
+  auto extremaStr = negative ? minIntStr : maxIntStr;
   if (*in != '.' && !wasE) {
-    if (LIKELY(!in.getOpts().double_fallback || integral.size() < maxIntLen) ||
-        (!negative && integral.size() == maxIntLen && integral <= maxInt) ||
-        (negative && integral.size() == minIntLen && integral <= minInt)) {
+    if (LIKELY(!in.getOpts().double_fallback || integral.size() < extremaLen) ||
+        (integral.size() == extremaLen && integral <= extremaStr)) {
       auto val = to<int64_t>(integral);
       in.skipWhitespace();
       return val;
@@ -659,7 +753,7 @@ std::string serialize(dynamic const& dyn, serialization_opts const& opts) {
   std::string ret;
   unsigned indentLevel = 0;
   Printer p(ret, opts.pretty_formatting ? &indentLevel : nullptr, &opts);
-  p(dyn);
+  p(dyn, nullptr);
   return ret;
 }
 
@@ -680,7 +774,7 @@ size_t firstEscapableInWord(T s, const serialization_opts& opts) {
   };
 
   auto isChar = [&](uint8_t c) {
-    // A byte is == c iff it is 0 if xored with c.
+    // A byte is == c iff it is 0 if xor'd with c.
     return isLess(s ^ (kOnes * c), 1);
   };
 

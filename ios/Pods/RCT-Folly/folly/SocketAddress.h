@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -595,7 +595,7 @@ class SocketAddress {
     AddrStorage() : addr() {}
   } storage_{};
   // IPAddress class does nto save zone or port, and must be saved here
-  uint16_t port_;
+  uint16_t port_{0};
 
   bool external_{false};
 };

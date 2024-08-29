@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ namespace folly {
  * Debug string for an exception: include type and what(), if
  * defined.
  */
-fbstring exceptionStr(const std::exception& e);
+fbstring exceptionStr(std::exception const& e);
 
-fbstring exceptionStr(std::exception_ptr ep);
+fbstring exceptionStr(std::exception_ptr const& ep);
 
 } // namespace folly

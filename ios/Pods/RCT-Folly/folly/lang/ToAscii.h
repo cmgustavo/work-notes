@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,7 @@
 #include <folly/Utility.h>
 #include <folly/lang/Align.h>
 #include <folly/lang/CArray.h>
-
-#if _MSC_VER
-#include <intrin.h>
-#endif
+#include <folly/portability/Builtins.h>
 
 namespace folly {
 
@@ -56,18 +53,6 @@ using to_ascii_alphabet_upper = to_ascii_alphabet<true>;
 
 namespace detail {
 
-FOLLY_ERASE auto to_ascii_port_clzll(uint64_t v) {
-#if _MSC_VER
-#if FOLLY_X64
-  return __lzcnt64(v);
-#else
-  return __assume(0), 0;
-#endif
-#else
-  return __builtin_clzll(v);
-#endif
-}
-
 template <uint64_t Base, typename Alphabet>
 struct to_ascii_array {
   using data_type_ = c_array<uint8_t, Base>;
@@ -75,7 +60,7 @@ struct to_ascii_array {
     data_type_ result{};
     Alphabet alpha;
     for (size_t i = 0; i < Base; ++i) {
-      result.data[i] = alpha(i);
+      result.data[i] = alpha(static_cast<uint8_t>(i));
     }
     return result;
   }
@@ -86,7 +71,7 @@ struct to_ascii_array {
   }
 };
 template <uint64_t Base, typename Alphabet>
-alignas(hardware_constructive_interference_size)
+alignas(kIsMobile ? sizeof(size_t) : hardware_constructive_interference_size)
     typename to_ascii_array<Base, Alphabet>::data_type_ const
     to_ascii_array<Base, Alphabet>::data =
         to_ascii_array<Base, Alphabet>::data_();
@@ -139,13 +124,13 @@ extern template to_ascii_table<10, to_ascii_alphabet_upper>::data_type_ const
 extern template to_ascii_table<16, to_ascii_alphabet_upper>::data_type_ const
     to_ascii_table<16, to_ascii_alphabet_upper>::data;
 
-template <uint64_t Base, typename I>
+template <uint64_t Base, typename Int>
 struct to_ascii_powers {
-  static constexpr size_t size_(I v) {
+  static constexpr size_t size_(Int v) {
     return 1 + (v < Base ? 0 : size_(v / Base));
   }
-  static constexpr size_t const size = size_(~I(0));
-  using data_type_ = c_array<I, size>;
+  static constexpr size_t const size = size_(~Int(0));
+  using data_type_ = c_array<Int, size>;
   static constexpr data_type_ data_() {
     data_type_ result{};
     for (size_t i = 0; i < size; ++i) {
@@ -156,12 +141,12 @@ struct to_ascii_powers {
   // @lint-ignore CLANGTIDY
   static data_type_ const data;
 };
-template <uint64_t Base, typename I>
-constexpr size_t const to_ascii_powers<Base, I>::size;
-template <uint64_t Base, typename I>
+template <uint64_t Base, typename Int>
+constexpr size_t const to_ascii_powers<Base, Int>::size;
+template <uint64_t Base, typename Int>
 alignas(hardware_constructive_interference_size)
-    typename to_ascii_powers<Base, I>::data_type_ const
-    to_ascii_powers<Base, I>::data = to_ascii_powers<Base, I>::data_();
+    typename to_ascii_powers<Base, Int>::data_type_ const
+    to_ascii_powers<Base, Int>::data = to_ascii_powers<Base, Int>::data_();
 
 extern template to_ascii_powers<8, uint64_t>::data_type_ const
     to_ascii_powers<8, uint64_t>::data;
@@ -224,16 +209,20 @@ FOLLY_ALWAYS_INLINE size_t to_ascii_size_clzll(uint64_t v) {
   }
 
   //  log2 is approx log<2>(v)
-  size_t const vlog2 = 64 - to_ascii_port_clzll(v);
+  size_t const vlog2 = 64 - static_cast<size_t>(__builtin_clzll(v));
+
+  //  work around msvc warning C4127 (conditional expression is constant)
+  bool false_ = false;
 
   //  handle directly when Base is power-of-two
-  if (!(Base & (Base - 1))) {
+  if (false_ || !(Base & (Base - 1))) {
     constexpr auto const blog2 = constexpr_log2(Base);
     return vlog2 / blog2 + size_t(vlog2 % blog2 != 0);
   }
 
   //  blog2r is approx 1 / log<2>(Base), used in log change-of-base just below
-  constexpr auto const blog2r = 8. / constexpr_log2(constexpr_pow(Base, 8));
+  constexpr auto const blog2m = constexpr_log2(constexpr_pow(Base, 8));
+  constexpr auto const blog2r = 8. / double(blog2m);
 
   //  vlogb is approx log<Base>(v) = log<2>(v) / log<2>(Base)
   auto const vlogb = vlog2 * size_t(blog2r * 256) / 256;
@@ -262,16 +251,10 @@ FOLLY_ALWAYS_INLINE void to_ascii_with_basic(
     //  keep /, % together so a peephole optimization computes them together
     auto const q = v / Base;
     auto const r = v % Base;
-    out[pos] = xlate(r);
+    out[pos] = xlate(uint8_t(r));
     v = q;
   }
-  out[0] = xlate(v);
-}
-template <uint64_t Base, typename Alphabet>
-FOLLY_ALWAYS_INLINE size_t to_ascii_with_basic(char* out, uint64_t v) {
-  auto const size = to_ascii_size_route<Base>(v);
-  to_ascii_with_basic<Base, Alphabet>(out, size, v);
-  return size;
+  out[0] = xlate(uint8_t(v));
 }
 
 //  A variant of the straightforward implementation, but using a lookup table.
@@ -280,12 +263,6 @@ FOLLY_ALWAYS_INLINE void to_ascii_with_array(
     char* out, size_t size, uint64_t v) {
   using array = to_ascii_array<Base, Alphabet>; // also an alphabet
   to_ascii_with_basic<Base, array>(out, size, v);
-}
-template <uint64_t Base, typename Alphabet>
-FOLLY_ALWAYS_INLINE size_t to_ascii_with_array(char* out, uint64_t v) {
-  auto const size = to_ascii_size_route<Base>(v);
-  to_ascii_with_array<Base, Alphabet>(out, size, v);
-  return size;
 }
 
 //  A trickier implementation which performs half as many divides as the other,
@@ -324,6 +301,24 @@ FOLLY_ALWAYS_INLINE size_t to_ascii_with_table(char* out, uint64_t v) {
   return size;
 }
 
+template <uint64_t Base, typename Alphabet>
+FOLLY_ALWAYS_INLINE size_t
+to_ascii_with_route(char* outb, char const* oute, uint64_t v) {
+  auto const size = to_ascii_size_route<Base>(v);
+  if (FOLLY_UNLIKELY(oute < outb || size_t(oute - outb) < size)) {
+    return 0;
+  }
+  kIsMobile //
+      ? to_ascii_with_array<Base, Alphabet>(outb, size, v)
+      : to_ascii_with_table<Base, Alphabet>(outb, size, v);
+  return size;
+}
+template <uint64_t Base, typename Alphabet, size_t N>
+FOLLY_ALWAYS_INLINE size_t to_ascii_with_route(char (&out)[N], uint64_t v) {
+  static_assert(N >= to_ascii_powers<Base, decltype(v)>::size, "out too small");
+  return to_ascii_with_table<Base, Alphabet>(out, v);
+}
+
 } // namespace detail
 
 //  to_ascii_size_max
@@ -333,16 +328,16 @@ FOLLY_ALWAYS_INLINE size_t to_ascii_with_table(char* out, uint64_t v) {
 //
 //  In base 10, u64 requires at most 20 bytes, u32 at most 10, u16 at most 5,
 //  and u8 at most 3.
-template <uint64_t Base, typename I>
+template <uint64_t Base, typename Int>
 FOLLY_INLINE_VARIABLE constexpr size_t to_ascii_size_max =
-    detail::to_ascii_powers<Base, I>::size;
+    detail::to_ascii_powers<Base, Int>::size;
 
 //  to_ascii_size_max_decimal
 //
 //  An alias to to_ascii_size_max<10>.
-template <typename I>
+template <typename Int>
 FOLLY_INLINE_VARIABLE constexpr size_t to_ascii_size_max_decimal =
-    to_ascii_size_max<10, I>;
+    to_ascii_size_max<10, Int>;
 
 //  to_ascii_size
 //
@@ -379,15 +374,11 @@ inline size_t to_ascii_size_decimal(uint64_t v) {
 //  async-signal-safe
 template <uint64_t Base, typename Alphabet>
 size_t to_ascii_with(char* outb, char const* oute, uint64_t v) {
-  auto const size = to_ascii_size<Base>(v);
-  return FOLLY_UNLIKELY(oute < outb || size_t(oute - outb) < size)
-      ? 0
-      : detail::to_ascii_with_table<Base, Alphabet>(outb, v);
+  return detail::to_ascii_with_route<Base, Alphabet>(outb, oute, v);
 }
 template <uint64_t Base, typename Alphabet, size_t N>
 size_t to_ascii_with(char (&out)[N], uint64_t v) {
-  static_assert(N >= to_ascii_size_max<Base, decltype(v)>, "out too small");
-  return detail::to_ascii_with_table<Base, Alphabet>(out, v);
+  return detail::to_ascii_with_route<Base, Alphabet>(out, v);
 }
 
 //  to_ascii_lower
@@ -422,7 +413,7 @@ size_t to_ascii_upper(char (&out)[N], uint64_t v) {
 //
 //  An alias to to_ascii<10, false>.
 //
-//  async-signals-afe
+//  async-signal-safe
 inline size_t to_ascii_decimal(char* outb, char const* oute, uint64_t v) {
   return to_ascii_lower<10>(outb, oute, v);
 }

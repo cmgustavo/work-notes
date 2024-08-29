@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <folly/Executor.h>
-#include <folly/io/async/EventBase.h>
-#include <rsocket/RSocket.h>
 #include <mutex>
 #include "FlipperConnectionManager.h"
 #include "FlipperInitConfig.h"
+#include "FlipperScheduler.h"
+#include "FlipperSocket.h"
 #include "FlipperState.h"
 
 namespace facebook {
@@ -21,9 +20,7 @@ namespace flipper {
 class ConnectionEvents;
 class ConnectionContextStore;
 class FlipperRSocketResponder;
-
-rsocket::Payload toRSocketPayload(folly::dynamic data);
-
+class FlipperConnectionManagerWrapper;
 class FlipperConnectionManagerImpl : public FlipperConnectionManager {
   friend ConnectionEvents;
 
@@ -39,11 +36,13 @@ class FlipperConnectionManagerImpl : public FlipperConnectionManager {
 
   void stop() override;
 
-  bool isOpen() const override;
+  bool isConnected() const override;
 
   void setCallbacks(Callbacks* callbacks) override;
 
   void sendMessage(const folly::dynamic& message) override;
+
+  void sendMessageRaw(const std::string& message) override;
 
   void onMessageReceived(
       const folly::dynamic& message,
@@ -55,7 +54,7 @@ class FlipperConnectionManagerImpl : public FlipperConnectionManager {
   std::shared_ptr<FlipperCertificateProvider> getCertificateProvider() override;
 
  private:
-  bool isOpen_ = false;
+  bool isConnected_ = false;
   bool isStarted_ = false;
   std::shared_ptr<FlipperCertificateProvider> certProvider_ = nullptr;
   Callbacks* callbacks_;
@@ -63,21 +62,35 @@ class FlipperConnectionManagerImpl : public FlipperConnectionManager {
   std::shared_ptr<FlipperState> flipperState_;
   int insecurePort;
   int securePort;
+  int altInsecurePort;
+  int altSecurePort;
 
-  folly::EventBase* flipperEventBase_;
-  folly::EventBase* connectionEventBase_;
-  std::unique_ptr<rsocket::RSocketClient> client_;
+  Scheduler* flipperScheduler_;
+  Scheduler* connectionScheduler_;
+
+  std::unique_ptr<FlipperSocket> client_;
+
   bool connectionIsTrusted_;
+  bool certificateExchangeCompleted_ = false;
+
   int failedConnectionAttempts_ = 0;
+  int failedSocketConnectionAttempts = 0;
+
   std::shared_ptr<ConnectionContextStore> contextStore_;
+  std::shared_ptr<FlipperConnectionManagerWrapper> implWrapper_;
 
   void startSync();
-  bool doCertificateExchange();
+  bool connectAndExchangeCertificate();
   bool connectSecurely();
+  void handleSocketEvent(const SocketEvent event);
   bool isCertificateExchangeNeeded();
-  void requestSignedCertFromFlipper();
+  void requestSignedCertificate();
+  void processSignedCertificateResponse(
+      std::shared_ptr<FlipperStep> gettingCertificateStep,
+      std::string response,
+      bool isError);
   bool isRunningInOwnThread();
-  void sendLegacyCertificateRequest(folly::dynamic message);
+  void reevaluateSocketProvider();
   std::string getDeviceId();
 };
 

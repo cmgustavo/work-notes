@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@
 #include <cstdint>
 #include <system_error>
 
+#include <folly/Exception.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
-
 namespace folly {
 namespace detail {
 
@@ -55,7 +55,7 @@ class MMapAlloc {
         -1,
         0));
     if (mem == reinterpret_cast<void*>(-1)) {
-      throw std::system_error(errno, std::system_category());
+      throw std::system_error(errno, errorCategoryForErrnoDomain());
     }
 #if !defined(MAP_POPULATE) && defined(MADV_WILLNEED)
     madvise(mem, size, MADV_WILLNEED);

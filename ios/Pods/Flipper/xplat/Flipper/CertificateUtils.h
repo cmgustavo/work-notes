@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -19,6 +19,14 @@ bool generateCertSigningRequest(
     const char* appId,
     const char* csrFile,
     const char* privateKeyFile);
+
+bool generateCertPKCS12(
+    const char* caCertificateFile,
+    const char* certificateFile,
+    const char* keyFile,
+    const char* pkcs12File,
+    const char* pkcs12Name,
+    const char* pkcs12Password);
 
 } // namespace flipper
 } // namespace facebook

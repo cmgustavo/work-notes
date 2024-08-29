@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,6 @@
 #include <folly/detail/Singleton.h>
 #include <folly/detail/UniqueInstance.h>
 #include <folly/functional/Invoke.h>
-
-// we do not want to use FOLLY_TLS here for mobile
-#if !FOLLY_MOBILE && defined(FOLLY_TLS)
-#define FOLLY_STL_USE_FOLLY_TLS 1
-#else
-#undef FOLLY_STL_USE_FOLLY_TLS
-#endif
 
 namespace folly {
 
@@ -84,7 +77,10 @@ class SingletonThreadLocal {
   struct LocalCache {
     Wrapper* cache;
   };
-  static_assert(std::is_pod<LocalCache>::value, "non-pod");
+  static_assert(
+      std::is_standard_layout<LocalCache>::value &&
+          std::is_trivial<LocalCache>::value,
+      "non-pod");
 
   struct LocalLifetime;
 
@@ -139,15 +135,12 @@ class SingletonThreadLocal {
   SingletonThreadLocal() = delete;
 
   FOLLY_ALWAYS_INLINE static WrapperTL& getWrapperTL() {
+    (void)unique; // force the object not to be thrown out as unused
     return detail::createGlobal<WrapperTL, Tag>();
   }
 
-  FOLLY_NOINLINE static Wrapper& getWrapper() {
-    (void)unique; // force the object not to be thrown out as unused
-    return *getWrapperTL();
-  }
+  FOLLY_NOINLINE static Wrapper& getWrapper() { return *getWrapperTL(); }
 
-#ifdef FOLLY_STL_USE_FOLLY_TLS
   FOLLY_NOINLINE static Wrapper& getSlow(LocalCache& cache) {
     if (threadlocal_detail::StaticMetaBase::dying()) {
       return getWrapper();
@@ -156,16 +149,19 @@ class SingletonThreadLocal {
     lifetime.track(cache); // idempotent
     return FOLLY_LIKELY(!!cache.cache) ? *cache.cache : getWrapper();
   }
-#endif
 
  public:
   FOLLY_EXPORT FOLLY_ALWAYS_INLINE static T& get() {
-#ifdef FOLLY_STL_USE_FOLLY_TLS
+    if (kIsMobile) {
+      return getWrapper();
+    }
     static thread_local LocalCache cache;
     return FOLLY_LIKELY(!!cache.cache) ? *cache.cache : getSlow(cache);
-#else
-    return getWrapper();
-#endif
+  }
+
+  static T* try_get() {
+    auto* wrapper = getWrapperTL().get_existing();
+    return wrapper ? &static_cast<T&>(*wrapper) : nullptr;
   }
 
   class Accessor {
@@ -219,7 +215,7 @@ class SingletonThreadLocal {
 
 template <typename T, typename Tag, typename Make, typename TLTag>
 detail::UniqueInstance SingletonThreadLocal<T, Tag, Make, TLTag>::unique{
-    "folly::SingletonThreadLocal", tag_t<T, Tag>{}, tag_t<Make, TLTag>{}};
+    tag<SingletonThreadLocal>, tag<T, Tag>, tag<Make, TLTag>};
 
 } // namespace folly
 

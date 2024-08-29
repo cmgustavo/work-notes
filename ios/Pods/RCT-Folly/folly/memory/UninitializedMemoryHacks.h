@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,8 +401,8 @@ struct MakeUnsafeVectorSetLargerSize : std::vector<T> {
       &std::vector<TYPE>::_Mypair,                                             \
       decltype(&decltype(std::declval<std::vector<TYPE>>()._Mypair)::_Myval2), \
       &decltype(std::declval<std::vector<TYPE>>()._Mypair)::_Myval2,           \
-      decltype(&decltype(                                                      \
-          std::declval<std::vector<TYPE>>()._Mypair._Myval2)::_Mylast),        \
+      decltype(&decltype(std::declval<std::vector<TYPE>>()                     \
+                             ._Mypair._Myval2)::_Mylast),                      \
       &decltype(std::declval<std::vector<TYPE>>()._Mypair._Myval2)::_Mylast>;  \
   FOLLY_DECLARE_VECTOR_RESIZE_WITHOUT_INIT_IMPL(TYPE)
 
