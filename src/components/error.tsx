@@ -1,6 +1,6 @@
 import React from 'react';
 import {useTheme} from 'react-native-paper';
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 
 interface Props {
   errorText1: string;

@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, useColorScheme} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import {View, TouchableOpacity} from 'react-native';
+import {useTheme, Text} from 'react-native-paper';
 
 import CurrentPlatform from './platform';
 import {
@@ -16,7 +16,6 @@ interface Props {
 
 const Welcome = ({navigation}: Props) => {
   const {colors} = useTheme();
-  const scheme = useColorScheme();
   return (
     <View style={ContainerStyles.welcomeContainer}>
       <Text

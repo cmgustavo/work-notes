@@ -5,12 +5,7 @@ import {useTheme, Button, Text, Divider, Dialog} from 'react-native-paper';
 import {useAppDispatch} from '../store';
 import {deleteNote} from '../store/notes';
 
-import {
-  ContainerStyles,
-  TextStyles,
-  GlobalStyles,
-  ButtonStyles,
-} from '../styles';
+import {ContainerStyles, GlobalStyles} from '../styles';
 
 const ViewNote = ({route, navigation}) => {
   const dispatch = useAppDispatch();

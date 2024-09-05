@@ -1,6 +1,5 @@
 import React from 'react';
-import {Text} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import {useTheme, Text} from 'react-native-paper';
 
 import {TextStyles} from '../styles';
 import getPlatform from '../services/platform';

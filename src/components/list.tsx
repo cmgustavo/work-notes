@@ -1,16 +1,9 @@
 import React from 'react';
 import moment from 'moment';
-import {TouchableOpacity, FlatList, View} from 'react-native';
-import {
-  useTheme,
-  Card,
-  Text,
-  Button,
-  Divider,
-  IconButton,
-} from 'react-native-paper';
+import {FlatList} from 'react-native';
+import {useTheme, Card, Text, Divider} from 'react-native-paper';
 
-import {ContainerStyles, TextStyles} from '../styles';
+import {ContainerStyles} from '../styles';
 
 interface Props {
   navigation: any;
