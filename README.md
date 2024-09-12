@@ -22,8 +22,6 @@ At Work-Notes, we prioritize the privacy and security of our users' data. This P
 - **Consent:** By using Work-Notes, you consent to the collection and use of your data as outlined in this Privacy Policy.
 - **Policy Updates:** Work-Notes may update this Privacy Policy periodically. Users will be notified of any changes, and continued use of the app constitutes acceptance of the revised policy.
 
-If you have any questions or concerns regarding our Privacy Policy or the handling of your data, please contact us at [contact@kaicope.com](mailto:contact@kaicope.com).
-
 Your privacy and trust are paramount to us at Work-Notes. We are committed to providing a secure and reliable platform for all your note-taking needs.
 
 ## License
