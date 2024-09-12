@@ -1,7 +1,12 @@
 import React, {useLayoutEffect, useEffect} from 'react';
 import {View} from 'react-native';
-import {useTheme, FAB, ActivityIndicator, IconButton} from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import {
+  useTheme,
+  FAB,
+  Text,
+  ActivityIndicator,
+  IconButton,
+} from 'react-native-paper';
 
 import {useAppDispatch, useAppSelector, RootState} from '../store';
 import {initializeNotes} from '../store/notes';

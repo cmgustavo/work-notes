@@ -1,11 +1,12 @@
 import React, {createContext, useState, useEffect, useContext} from 'react';
-import {useColorScheme, ColorSchemeName} from 'react-native';
+import {useColorScheme, ColorSchemeName, StatusBar} from 'react-native';
 import {useAppDispatch, useAppSelector, RootState} from '../store';
 import {setColorScheme} from '../store/app/app.actions';
 import {PaperProvider} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import CombinedDefaultTheme from '../themes/light';
 import CombinedDarkTheme from '../themes/dark';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 // Define the type for your context
 type PreferencesContextType = {
@@ -48,12 +49,20 @@ export const PreferencesProvider = ({
   };
 
   return (
-    <PreferencesContext.Provider
-      value={{colorTheme, setColorTheme: handleSetColorTheme}}>
-      <PaperProvider theme={appTheme}>
-        <NavigationContainer theme={appTheme}>{children}</NavigationContainer>
-      </PaperProvider>
-    </PreferencesContext.Provider>
+    <SafeAreaProvider style={{backgroundColor: appTheme.colors.background}}>
+      <StatusBar
+        animated={true}
+        barStyle={colorTheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={'transparent'}
+        translucent={true}
+      />
+      <PreferencesContext.Provider
+        value={{colorTheme, setColorTheme: handleSetColorTheme}}>
+        <PaperProvider theme={appTheme}>
+          <NavigationContainer theme={appTheme}>{children}</NavigationContainer>
+        </PaperProvider>
+      </PreferencesContext.Provider>
+    </SafeAreaProvider>
   );
 };
 
