@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work-Notes: Your Simple Daily Companion</title>
+    <title>WorkNotes: Your Simple Daily Companion</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,11 +63,44 @@
             gap: 20px;
             max-width: 1200px;
         }
+        .gallery a {
+            display: block;
+        }
         .gallery img {
-            width: 300px;
+            width: 150px;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .gallery img:hover {
+            transform: scale(1.1);
+        }
+        .footer {
+          border-top: 1px solid #ddd;
+          padding-top: 20px;
+          margin-top: 40px;
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          max-width: 1200px;
+          align-items: center;
+        }
+        .footer a {
+            text-decoration: none;
+            color: #0366d6;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer img {
+            width: 20px;
+            height: 20px;
+        }
+        .copyright {
+            font-size: 14px;
+            color: #555;
         }
     </style>
 </head>
@@ -76,11 +109,11 @@
   <div class="header">
     <img src="logo.png" alt="Work-Notes Logo">
     <div class="header-text">
-      <h1>Work-Notes</h1>
+      <h1>WorkNotes</h1>
       <span class="subtitle">Your Simple Daily Companion</span>
     </div>
   </div>
-  <p class="description">Work-Notes is a lightweight and intuitive mobile application designed to streamline your daily meeting tracking and note-taking process. Whether you're a professional, a student, or anyone with a busy schedule, Work-Notes provides a convenient platform to jot down important insights, tasks, and meetings, ensuring you never miss a beat.</p>
+  <p class="description">WorkNotes is a lightweight and intuitive mobile application designed to streamline your daily meeting tracking and note-taking process. Whether you're a professional, a student, or anyone with a busy schedule, WorkNotes provides a convenient platform to jot down important insights, tasks, and meetings, ensuring you never miss a beat.</p>
 
     <h2>Key Features</h2>
     <ul>
@@ -92,21 +125,43 @@
       <li><b>Offline Access</b>: Access and update your notes even when you're offline, ensuring uninterrupted productivity.</li>
     </ul>
 
-    <p class="description">Whether you're jotting down meeting minutes, brainstorming ideas, or keeping track of tasks, Work-Notes is your reliable companion for staying organized and productive throughout your day.</p>
+    <p class="description">Whether you're jotting down meeting minutes, brainstorming ideas, or keeping track of tasks, WorkNotes is your reliable companion for staying organized and productive throughout your day.</p>
 
     <h2>Screenshots</h2>
 
     <div class="gallery">
-        <img src="Home-dark.png" alt="Home Dark">
-        <img src="Home-light.png" alt="Home Light">
-        <img src="HomeEmpty-light.png" alt="Home Empty Light">
-        <img src="HomeEmpty-dark.png" alt="Home Empty Dark">
-        <img src="New-dark.png" alt="New Dark">
-        <img src="New-light.png" alt="New Light">
-        <img src="Note-dark.png" alt="Note Dark">
-        <img src="Note-light.png" alt="Note Light">
-        <img src="Settings-light.png" alt="Settings Light">
-        <img src="Settings-dark.png" alt="Settings Dark">
+        <a href="Home-dark.png" target="_blank"><img src="Home-dark.png" alt="Home Dark"></a>
+        <a href="Home-light.png" target="_blank"><img src="Home-light.png" alt="Home Light"></a>
+        <a href="HomeEmpty-light.png" target="_blank"><img src="HomeEmpty-light.png" alt="Home Empty Light"></a>
+        <a href="HomeEmpty-dark.png" target="_blank"><img src="HomeEmpty-dark.png" alt="Home Empty Dark"></a>
+        <a href="New-dark.png" target="_blank"><img src="New-dark.png" alt="New Dark"></a>
+        <a href="New-light.png" target="_blank"><img src="New-light.png" alt="New Light"></a>
+        <a href="Note-dark.png" target="_blank"><img src="Note-dark.png" alt="Note Dark"></a>
+        <a href="Note-light.png" target="_blank"><img src="Note-light.png" alt="Note Light"></a>
+        <a href="Settings-light.png" target="_blank"><img src="Settings-light.png" alt="Settings Light"></a>
+        <a href="Settings-dark.png" target="_blank"><img src="Settings-dark.png" alt="Settings Dark"></a>
+    </div>
+
+    <h2>Privacy Policy</h2>
+
+    <p>
+    At WorkNotes, we prioritize the privacy and security of our users' data.
+    This Privacy Policy outlines how we collect, use, and safeguard your
+    information:</p>
+
+    <ul>
+      <li><b>Data Collection</b>: WorkNotes doesn't collect any information from the user, except the notes and associated dates entered by them.</li>
+      <li><b>Data Storage</b>: All data entered into WorkNotes is stored locally on your device. We do not transmit or store any user data on external servers or third-party platforms.</li>
+      <li><b>Data Access</b>: WorkNotes does not access, share, or sell any user data to third parties. Your information remains solely within your control and is not shared with anyone, including the developers of the application.</li>
+      <li><b>Security Measures</b>: We employ robust security measures to protect your data from unauthorized access, alteration, disclosure, or destruction.</li>
+      <li><b>Consent</b>: By using WorkNotes, you consent to the collection and use of your data as outlined in this Privacy Policy.</li>
+      <li><b>Policy Updates</b>: WorkNotes may update this Privacy Policy periodically. Users will be notified of any changes, and continued use of the app constitutes acceptance of the revised policy.</li>
+    </ul>
+
+    <div class="footer">
+      <a href="https://github.com/cmgustavo/work-notes" target="_blank">
+        <img src="github-mark.png" alt="GitHub Logo">GitHub</a>
+      <span class="copyright">&copy; 2025</span>
     </div>
 
 </body>
