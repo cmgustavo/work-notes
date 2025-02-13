@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, TouchableOpacity} from 'react-native';
-import {useTheme, Text} from 'react-native-paper';
+import {View} from 'react-native';
+import {useTheme, Text, Button} from 'react-native-paper';
 
 import CurrentPlatform from './platform';
 import {
@@ -28,16 +28,9 @@ const Welcome = ({navigation}: Props) => {
       <Text style={[TextStyles.subtitle, {color: colors.secondary}]}>
         Get start writing your first note for today.
       </Text>
-      <TouchableOpacity
-        style={[
-          ButtonStyles.button,
-          {backgroundColor: colors.primaryContainer},
-        ]}
-        onPress={() => navigation.navigate('AddNote')}>
-        <Text style={[TextStyles.text, {color: colors.onPrimaryContainer}]}>
-          Add a new Note
-        </Text>
-      </TouchableOpacity>
+      <Button mode="contained" onPress={() => navigation.navigate('AddNote')}>
+        Add a new Note
+      </Button>
       <View style={GlobalStyles.bottom}>
         <CurrentPlatform />
       </View>
