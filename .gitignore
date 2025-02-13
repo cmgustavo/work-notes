@@ -10,7 +10,7 @@ lerna-debug.log*
 .idea
 
 # Keystore
-work-notes-key.keystore
+work-notes.jks
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -114,6 +114,7 @@ dist
 
 # OSX
 
+*.DS_Store
 .DS_Store
 .AppleDouble
 .LSOverride

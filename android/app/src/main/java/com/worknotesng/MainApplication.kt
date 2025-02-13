@@ -1,4 +1,4 @@
-package com.worknotes
+package com.worknotesng
 
 import android.app.Application
 import com.facebook.react.PackageList

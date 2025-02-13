@@ -1,4 +1,4 @@
-package com.worknotes
+package com.worknotesng
 
 import android.os.Bundle;
 
