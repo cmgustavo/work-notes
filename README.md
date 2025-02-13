@@ -1,4 +1,7 @@
+![Work-Notes Logo](docs/logo.png)
+
 # Work-Notes
+### Your Simple Daily Companion
 
 Work-Notes is a lightweight and intuitive mobile application designed to streamline your daily meeting tracking and note-taking process.
 
@@ -10,6 +13,28 @@ Work-Notes is a lightweight and intuitive mobile application designed to streaml
 - **Intuitive Interface:** Simple and user-friendly design makes navigating and using the app a breeze.
 - **Customization:** Tailor your notes with customizable options to suit your preferences and needs.
 - **Offline Access:** Access and update your notes even when you're offline, ensuring uninterrupted productivity.
+
+## Screenshot Gallery
+
+| ![Home Dark](docs/Home-dark.png) | ![Home Light](docs/Home-light.png) |
+|----------------------------|-----------------------------|
+| Home (Dark) | Home (Light) |
+
+| ![Home Empty Light](docs/HomeEmpty-light.png) | ![Home Empty Dark](docs/HomeEmpty-dark.png) |
+|-----------------------------------------|----------------------------------------|
+| Home Empty (Light) | Home Empty (Dark) |
+
+| ![New Dark](docs/New-dark.png) | ![New Light](docs/New-light.png) |
+|--------------------------|--------------------------|
+| New (Dark) | New (Light) |
+
+| ![Note Dark](docs/Note-dark.png) | ![Note Light](docs/Note-light.png) |
+|----------------------------|-----------------------------|
+| Note (Dark) | Note (Light) |
+
+| ![Settings Light](docs/Settings-light.png) | ![Settings Dark](docs/Settings-dark.png) |
+|--------------------------------------|-------------------------------------|
+| Settings (Light) | Settings (Dark) |
 
 ## Privacy Policy
 
