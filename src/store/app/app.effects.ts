@@ -1,6 +1,5 @@
-import {ColorSchemeName} from 'react-native';
 import {Effect} from '../index';
-import {appSuccess, appFailed, appTheme} from './index';
+import {appSuccess, appFailed} from './index';
 
 export const initializeApp =
   (): Effect<Promise<any>> => async (dispatch, getState) => {

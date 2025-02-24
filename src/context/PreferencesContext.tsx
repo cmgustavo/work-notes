@@ -2,7 +2,7 @@ import React, {createContext, useState, useEffect, useContext} from 'react';
 import {useColorScheme, ColorSchemeName, StatusBar} from 'react-native';
 import {useAppDispatch, useAppSelector, RootState} from '../store';
 import {setColorScheme} from '../store/app/app.actions';
-import {PaperProvider} from 'react-native-paper';
+import {adaptNavigationTheme, PaperProvider} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import CombinedDefaultTheme from '../themes/light';
 import CombinedDarkTheme from '../themes/dark';
@@ -36,6 +36,11 @@ export const PreferencesProvider = ({
     appTheme = colorTheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme;
   }
 
+  const {LightTheme, DarkTheme} = adaptNavigationTheme({
+    reactNavigationLight: CombinedDefaultTheme,
+    reactNavigationDark: CombinedDarkTheme,
+  });
+
   useEffect(() => {
     if (!colorTheme) {
       appTheme =
@@ -49,17 +54,20 @@ export const PreferencesProvider = ({
   };
 
   return (
-    <SafeAreaProvider style={{backgroundColor: appTheme.colors.background}}>
+    <SafeAreaProvider style={{backgroundColor: appTheme.colors.surface}}>
       <StatusBar
         animated={true}
         barStyle={colorTheme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={'transparent'}
+        backgroundColor={appTheme.colors.surface}
         translucent={true}
       />
       <PreferencesContext.Provider
         value={{colorTheme, setColorTheme: handleSetColorTheme}}>
         <PaperProvider theme={appTheme}>
-          <NavigationContainer theme={appTheme}>{children}</NavigationContainer>
+          <NavigationContainer
+            theme={colorTheme === 'dark' ? DarkTheme : LightTheme}>
+            {children}
+          </NavigationContainer>
         </PaperProvider>
       </PreferencesContext.Provider>
     </SafeAreaProvider>

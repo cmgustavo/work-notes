@@ -2,12 +2,9 @@ import React from 'react';
 import {View} from 'react-native';
 import {useTheme, Text, Button} from 'react-native-paper';
 
-import CurrentPlatform from './platform';
 import {
   ContainerStyles,
   TextStyles,
-  ButtonStyles,
-  GlobalStyles,
 } from '../styles';
 
 interface Props {
@@ -31,9 +28,6 @@ const Welcome = ({navigation}: Props) => {
       <Button mode="contained" onPress={() => navigation.navigate('AddNote')}>
         Add a new Note
       </Button>
-      <View style={GlobalStyles.bottom}>
-        <CurrentPlatform />
-      </View>
     </View>
   );
 };

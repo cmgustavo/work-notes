@@ -1,6 +1,5 @@
 import {Effect} from '../index';
 import {notesSuccess, notesFailed} from './index';
-import {NotesObj} from './notes.models';
 
 export const initializeNotes =
   (): Effect<Promise<any>> => async (dispatch, getState) => {

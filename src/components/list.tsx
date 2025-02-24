@@ -25,10 +25,7 @@ const List = ({notes, navigation}: Props) => {
             date: itemData.date,
           });
         }}
-        style={[
-          ContainerStyles.noteContainer,
-          {backgroundColor: colors.surfaceVariant},
-        ]}>
+        style={[ContainerStyles.noteContainer]}>
         <Card.Title
           title={moment(itemData.date).format('dddd, MMMM Do YYYY')}
           titleStyle={{color: colors.primary}}
@@ -52,10 +49,7 @@ const List = ({notes, navigation}: Props) => {
 
   return (
     <FlatList
-      style={[
-        ContainerStyles.notesContainer,
-        {backgroundColor: colors.background},
-      ]}
+      style={[ContainerStyles.notesContainer]}
       renderItem={_renderItem}
       data={Object.entries(notes).reverse()}
       keyExtractor={_keyExtractor}
