@@ -15,7 +15,7 @@ const AddNote = ({route, navigation}) => {
   const dispatch = useAppDispatch();
   const {id, text, date} = route.params || {};
   const {colors} = useTheme();
-  const [textAreaValue, setTextAreaValue] = useState(text);
+  const [textAreaValue, setTextAreaValue] = useState(text || '');
   const today = date || Date.now();
   const IS_DEV = __DEV__;
 

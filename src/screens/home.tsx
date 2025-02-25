@@ -1,10 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import {
-  FAB,
-  ActivityIndicator,
-  Appbar,
-} from 'react-native-paper';
+import {ActivityIndicator, Appbar} from 'react-native-paper';
 
 import {useAppSelector, RootState} from '../store';
 
@@ -21,6 +17,12 @@ const Home = ({navigation}) => {
     <>
       <Appbar.Header>
         <Appbar.Content title="Work Notes" />
+        {Object.entries(notes).length > 0 ? (
+          <Appbar.Action
+            icon={'plus'}
+            onPress={() => navigation.navigate('AddNote')}
+          />
+        ) : null}
         <Appbar.Action
           icon="cog"
           onPress={() => navigation.navigate('Preferences')}
@@ -42,14 +44,7 @@ const Home = ({navigation}) => {
         {Object.entries(notes).length == 0 ? (
           <Welcome navigation={navigation} />
         ) : (
-          <>
-            <List notes={notes} navigation={navigation} />
-            <FAB
-              icon="plus"
-              style={GlobalStyles.fab}
-              onPress={() => navigation.navigate('AddNote')}
-            />
-          </>
+          <List notes={notes} navigation={navigation} />
         )}
       </View>
     </>

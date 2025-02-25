@@ -60,6 +60,30 @@ export const NotesReducer = (
         },
       };
 
+    case NotesActionTypes.NOTES_TOGGLE_STARRED:
+      return {
+        ...state,
+        notes: {
+          ...state.notes,
+          [action.payload]: {
+            ...state.notes[action.payload],
+            isStarred: !state.notes[action.payload].isStarred,
+          },
+        },
+      };
+
+    case NotesActionTypes.NOTES_TOGGLE_PINNED:
+      return {
+        ...state,
+        notes: {
+          ...state.notes,
+          [action.payload]: {
+            ...state.notes[action.payload],
+            isPinned: !state.notes[action.payload].isPinned,
+          },
+        },
+      };
+
     default:
       return state;
   }

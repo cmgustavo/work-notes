@@ -24,3 +24,13 @@ export const updateNote = (note: NoteObj): NotesActionType => ({
   type: NotesActionTypes.NOTES_UPDATE,
   payload: note,
 });
+
+export const toggleStarred = (id: string): NotesActionType => ({
+  type: NotesActionTypes.NOTES_TOGGLE_STARRED,
+  payload: id,
+});
+
+export const togglePinned = (id: string): NotesActionType => ({
+  type: NotesActionTypes.NOTES_TOGGLE_PINNED,
+  payload: id,
+});

@@ -8,6 +8,8 @@ export enum NotesActionTypes {
   NOTES_CREATE = 'NOTES/CREATE',
   NOTES_DELETE = 'NOTES/DELETE',
   NOTES_UPDATE = 'NOTES/UPDATE',
+  NOTES_TOGGLE_STARRED = 'NOTES/TOGGLE_STARRED',
+  NOTES_TOGGLE_PINNED = 'NOTES/TOGGLE_PINNED',
 }
 
 interface NotesSuccess {
@@ -34,9 +36,21 @@ interface UpdateNote {
   payload: NoteObj;
 }
 
+interface ToggleStarred {
+  type: typeof NotesActionTypes.NOTES_TOGGLE_STARRED;
+  payload: string;
+}
+
+interface TogglePinned {
+  type: typeof NotesActionTypes.NOTES_TOGGLE_PINNED;
+  payload: string;
+}
+
 export type NotesActionType =
   | NotesSuccess
   | NotesFailed
   | CreateNote
   | DeleteNote
-  | UpdateNote;
+  | UpdateNote
+  | ToggleStarred
+  | TogglePinned;
