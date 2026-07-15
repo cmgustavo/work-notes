@@ -4,7 +4,7 @@ import {initializeApp} from './store/app';
 import MainNavigation from './components/main-navigation';
 
 import {PreferencesProvider} from './context/PreferencesContext';
-import {initializeNotes} from "./store/notes";
+import {initializeNotes} from './store/notes';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -12,7 +12,7 @@ const App = () => {
   useEffect(() => {
     dispatch(initializeApp());
     dispatch(initializeNotes());
-  }, []);
+  }, [dispatch]);
 
   return (
     <PreferencesProvider>

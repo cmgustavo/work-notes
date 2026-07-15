@@ -3,26 +3,35 @@ import moment from 'moment';
 import {View} from 'react-native';
 import {useTheme, TextInput, Text, Button, Appbar} from 'react-native-paper';
 
-import {useAppDispatch} from '../store';
+import {RootState, useAppDispatch, useAppSelector} from '../store';
 import {createNote, updateNote} from '../store/notes';
 import {ContainerStyles} from '../styles';
 
+interface Props {
+  navigation: any;
+  route: any;
+}
+
 const getUniqueId = () => {
-  return Math.random().toString(36).substr(2, 9);
+  return Math.random().toString(36).substring(2, 11);
 };
 
-const AddNote = ({route, navigation}) => {
+const AddNote = ({route, navigation}: Props) => {
   const dispatch = useAppDispatch();
   const {id, text, date} = route.params || {};
   const {colors} = useTheme();
   const [textAreaValue, setTextAreaValue] = useState(text || '');
   const today = date || Date.now();
   const IS_DEV = __DEV__;
+  const existingNote = useAppSelector(({NOTES}: RootState) =>
+    id ? NOTES.notes[id] : undefined,
+  );
 
   const addNote = (text: string) => {
     if (id) {
       dispatch(
         updateNote({
+          ...existingNote,
           id: id,
           text: text,
           date: today,
@@ -40,7 +49,7 @@ const AddNote = ({route, navigation}) => {
   };
 
   const addTestNote = () => {
-    const testText = 'Test Note ' + Math.random().toString(36).substr(2, 9);
+    const testText = 'Test Note ' + Math.random().toString(36).substring(2, 11);
     setTextAreaValue(testText);
   };
 
@@ -48,7 +57,7 @@ const AddNote = ({route, navigation}) => {
     <>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Add Note" />
+        <Appbar.Content title={id ? 'Edit Note' : 'Add Note'} />
         {IS_DEV ? (
           <Appbar.Action icon="dev-to" onPress={() => addTestNote()} />
         ) : null}

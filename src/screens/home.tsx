@@ -7,9 +7,13 @@ import {useAppSelector, RootState} from '../store';
 import ErrorMessage from '../components/error';
 import Welcome from '../components/welcome';
 import List from '../components/list';
-import {ContainerStyles, GlobalStyles} from '../styles';
+import {ContainerStyles} from '../styles';
 
-const Home = ({navigation}) => {
+interface Props {
+  navigation: any;
+}
+
+const Home = ({navigation}: Props) => {
   const notes = useAppSelector(({NOTES}: RootState) => NOTES.notes);
   const status = useAppSelector(({NOTES}: RootState) => NOTES.status);
 

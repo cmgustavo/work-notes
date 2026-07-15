@@ -5,8 +5,13 @@ import {ColorSchemeName} from 'react-native';
 
 import {usePreferences} from '../context/PreferencesContext';
 import {ContainerStyles} from '../styles';
+import {version as appVersion} from '../../package.json';
 
-const Preferences = ({navigation}) => {
+interface Props {
+  navigation: any;
+}
+
+const Preferences = ({navigation}: Props) => {
   const {colorTheme, setColorTheme} = usePreferences();
   const [checked, setChecked] = useState(colorTheme);
 
@@ -67,7 +72,7 @@ const Preferences = ({navigation}) => {
           <List.Subheader>
             <Text variant="titleMedium">About</Text>
           </List.Subheader>
-          <List.Item title="Version" right={props => <Text>v1.0.4</Text>} />
+          <List.Item title="Version" right={() => <Text>v{appVersion}</Text>} />
           <Divider />
         </List.Section>
       </View>

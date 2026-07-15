@@ -12,13 +12,17 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {RootState, useAppDispatch, useAppSelector} from '../store';
-import {deleteNote} from '../store/notes';
+import {deleteNote, togglePinned, toggleStarred} from '../store/notes';
 
 import {ContainerStyles} from '../styles';
-import ErrorMessage from '../components/error.tsx';
-import {togglePinned, toggleStarred} from '../store/notes/notes.actions.ts';
+import ErrorMessage from '../components/error';
 
-const ViewNote = ({route, navigation}) => {
+interface Props {
+  navigation: any;
+  route: any;
+}
+
+const ViewNote = ({route, navigation}: Props) => {
   const dispatch = useAppDispatch();
   const {colors} = useTheme();
   const [showError, setShowError] = useState(false);
@@ -82,15 +86,21 @@ const ViewNote = ({route, navigation}) => {
       setIsStarred(note.isStarred);
       setIsPinned(note.isPinned);
     }
-  }, [_notes]);
+  }, [_notes, id]);
 
   return (
     <>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Note" />
-        <Appbar.Action icon={isStarred ? 'star' : 'star-outline'} onPress={() => onToggleStar(id)} />
-        <Appbar.Action icon={isPinned ? 'pin' : 'pin-outline'} onPress={() => onTogglePin(id)} />
+        <Appbar.Action
+          icon={isStarred ? 'star' : 'star-outline'}
+          onPress={() => onToggleStar(id)}
+        />
+        <Appbar.Action
+          icon={isPinned ? 'pin' : 'pin-outline'}
+          onPress={() => onTogglePin(id)}
+        />
         <Menu
           style={{marginTop: 55, minWidth: 250}}
           visible={showMenu}

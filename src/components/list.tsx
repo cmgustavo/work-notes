@@ -12,12 +12,15 @@ import {
 } from 'react-native-paper';
 
 import {ContainerStyles} from '../styles';
-import {togglePinned, toggleStarred} from '../store/notes/notes.actions.ts';
+import {toggleStarred} from '../store/notes';
 import {useAppDispatch} from '../store';
+import {NoteObj, NotesObj} from '../store/notes/notes.models';
+
+type NoteEntry = [string, NoteObj];
 
 interface Props {
   navigation: any;
-  notes: any;
+  notes: NotesObj;
 }
 
 const List = ({notes, navigation}: Props) => {
@@ -27,7 +30,7 @@ const List = ({notes, navigation}: Props) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const getPinnedAndOtherNotes = () => {
-    const entries = Array.isArray(notes) ? notes : Object.entries(notes);
+    const entries: NoteEntry[] = Object.entries(notes);
 
     const pinnedNotes = entries.filter(([_, note]) => note.isPinned);
     const otherNotes = entries
@@ -40,7 +43,7 @@ const List = ({notes, navigation}: Props) => {
   const getFilteredNotes = () => {
     const {pinnedNotes, otherNotes} = getPinnedAndOtherNotes();
 
-    const filterFunc = ([_, note]) =>
+    const filterFunc = ([_, note]: NoteEntry) =>
       note.text.toLowerCase().includes(searchQuery.toLowerCase());
 
     return {
@@ -55,11 +58,7 @@ const List = ({notes, navigation}: Props) => {
     dispatch(toggleStarred(id));
   };
 
-  const onTogglePin = (id: string) => {
-    dispatch(togglePinned(id));
-  };
-
-  const _renderItem = ({item}) => {
+  const _renderItem = ({item}: {item: NoteEntry}) => {
     const [_, itemData] = item;
     return (
       <Card
@@ -79,7 +78,7 @@ const List = ({notes, navigation}: Props) => {
           titleStyle={{color: colors.primary}}
           subtitle={moment(itemData.date).fromNow()}
           subtitleStyle={{color: colors.secondary}}
-          right={props => (
+          right={() => (
             <IconButton
               icon={itemData.isStarred ? 'star' : 'star-outline'}
               onPress={() => onToggleStar(itemData.id)}
@@ -96,7 +95,7 @@ const List = ({notes, navigation}: Props) => {
     );
   };
 
-  const _renderPinnedItem = ({item}) => {
+  const _renderPinnedItem = ({item}: {item: NoteEntry}) => {
     const [_, itemData] = item;
     return (
       <RNList.Item
@@ -119,7 +118,7 @@ const List = ({notes, navigation}: Props) => {
     );
   };
 
-  const _keyExtractor = item => {
+  const _keyExtractor = (item: NoteEntry) => {
     const [key] = item;
     return key;
   };

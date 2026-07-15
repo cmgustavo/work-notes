@@ -2,10 +2,7 @@ import React from 'react';
 import {View} from 'react-native';
 import {useTheme, Text, Button} from 'react-native-paper';
 
-import {
-  ContainerStyles,
-  TextStyles,
-} from '../styles';
+import {ContainerStyles, TextStyles} from '../styles';
 
 interface Props {
   navigation: any;

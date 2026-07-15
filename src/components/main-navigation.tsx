@@ -11,23 +11,13 @@ const Stack = createNativeStackNavigator();
 class MainNavigation extends React.PureComponent {
   render() {
     return (
-      <Stack.Navigator initialRouteName="Home" screenOptions={{headerShown: false}}>
-        <Stack.Screen
-          name="Home"
-          component={Home}
-        />
-        <Stack.Screen
-          name="AddNote"
-          component={AddNote}
-        />
-        <Stack.Screen
-          name="ViewNote"
-          component={ViewNote}
-        />
-        <Stack.Screen
-          name="Preferences"
-          component={Preferences}
-        />
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{headerShown: false}}>
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="AddNote" component={AddNote} />
+        <Stack.Screen name="ViewNote" component={ViewNote} />
+        <Stack.Screen name="Preferences" component={Preferences} />
       </Stack.Navigator>
     );
   }

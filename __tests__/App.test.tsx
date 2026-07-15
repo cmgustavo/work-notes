@@ -4,14 +4,21 @@
 
 import 'react-native';
 import React from 'react';
-import App from '../App';
-
-// Note: import explicitly to use the types shipped with jest.
-import {it} from '@jest/globals';
+import {Provider} from 'react-redux';
 
 // Note: test renderer must be required after react-native.
 import renderer from 'react-test-renderer';
 
+import App from '../src/App';
+import getStore from '../src/store';
+
 it('renders correctly', () => {
-  renderer.create(<App />);
+  const {store} = getStore();
+  renderer.act(() => {
+    renderer.create(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
+  });
 });

@@ -1,5 +1,5 @@
 import {NotesActionType, NotesActionTypes, NotesStatus} from './notes.types';
-import {NotesObj, NoteObj} from './notes.models';
+import {NotesObj} from './notes.models';
 
 export const NotesReduxPersistBlackList: (keyof NotesState)[] = ['status'];
 
@@ -39,17 +39,17 @@ export const NotesReducer = (
         },
       };
 
-    case NotesActionTypes.NOTES_DELETE:
-      if (Object.keys(state.notes).length > 0) {
-        const {[action.payload]: _, ...newNotes} = state.notes as {
-          [key: string]: NoteObj;
-        };
-        return {
-          ...state,
-          notes: newNotes,
-        };
+    case NotesActionTypes.NOTES_DELETE: {
+      if (!state.notes[action.payload]) {
+        return state;
       }
-      return state;
+      const newNotes = {...state.notes};
+      delete newNotes[action.payload];
+      return {
+        ...state,
+        notes: newNotes,
+      };
+    }
 
     case NotesActionTypes.NOTES_UPDATE:
       return {
@@ -60,29 +60,33 @@ export const NotesReducer = (
         },
       };
 
-    case NotesActionTypes.NOTES_TOGGLE_STARRED:
+    case NotesActionTypes.NOTES_TOGGLE_STARRED: {
+      const note = state.notes[action.payload];
+      if (!note) {
+        return state;
+      }
       return {
         ...state,
         notes: {
           ...state.notes,
-          [action.payload]: {
-            ...state.notes[action.payload],
-            isStarred: !state.notes[action.payload].isStarred,
-          },
+          [action.payload]: {...note, isStarred: !note.isStarred},
         },
       };
+    }
 
-    case NotesActionTypes.NOTES_TOGGLE_PINNED:
+    case NotesActionTypes.NOTES_TOGGLE_PINNED: {
+      const note = state.notes[action.payload];
+      if (!note) {
+        return state;
+      }
       return {
         ...state,
         notes: {
           ...state.notes,
-          [action.payload]: {
-            ...state.notes[action.payload],
-            isPinned: !state.notes[action.payload].isPinned,
-          },
+          [action.payload]: {...note, isPinned: !note.isPinned},
         },
       };
+    }
 
     default:
       return state;

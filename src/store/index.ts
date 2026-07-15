@@ -6,7 +6,12 @@ import {
   AnyAction,
 } from 'redux';
 import {thunk, ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {Storage, persistReducer, persistStore} from 'redux-persist';
+import {
+  Storage,
+  createTransform,
+  persistReducer,
+  persistStore,
+} from 'redux-persist';
 import {MMKV} from 'react-native-mmkv';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import {Selector} from 'reselect';
@@ -37,15 +42,28 @@ export const reduxStorage: Storage = {
   },
 };
 
+const reducerPersistBlackLists: Record<keyof typeof reducers, string[]> = {
+  APP: AppReduxPersistBlackList,
+  NOTES: NotesReduxPersistBlackList,
+};
+
+// Strips each slice's blacklisted keys on the way to storage, so transient
+// fields like status are rebuilt from initialState on every launch.
+const blacklistTransform = createTransform((inboundState: any, key) => {
+  const blacklist = reducerPersistBlackLists[key as keyof typeof reducers];
+  if (!blacklist || !inboundState) {
+    return inboundState;
+  }
+  const filtered = {...inboundState};
+  blacklist.forEach(field => delete filtered[field]);
+  return filtered;
+});
+
 const persistConfig = {
   key: 'root',
   storage: reduxStorage,
   stateReconciler: autoMergeLevel2,
-};
-
-const reducerPersistBlackLists: Record<keyof typeof reducers, string[]> = {
-  APP: AppReduxPersistBlackList,
-  NOTES: NotesReduxPersistBlackList,
+  transforms: [blacklistTransform],
 };
 
 const rootReducer = combineReducers(reducers);
