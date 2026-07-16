@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 /**
- * Bumps the app version and the Android/iOS build number, commits and tags the
- * release. Both platforms share one build number.
+ * Verifies the working tree and dependencies, then bumps the app version and
+ * the Android/iOS build number, commits and tags the release. Both platforms
+ * share one build number. Signing/building stays in Android Studio.
+ *
+ * Every check runs before anything is written, so a failed release leaves the
+ * repo untouched.
  *
  * Usage:
  *   node ./scripts/release.js [patch|minor|major] [--dry-run] [--push]
@@ -9,7 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {execFileSync} = require('child_process');
+const {execFileSync, execSync} = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const PACKAGE_JSON = path.join(ROOT, 'package.json');
@@ -54,6 +58,22 @@ function parseArgs(argv) {
 
 function git(...args) {
   return execFileSync('git', args, {cwd: ROOT, encoding: 'utf8'}).trim();
+}
+
+function preflight() {
+  console.log('\nrelease: verifying dependencies against yarn.lock...\n');
+  try {
+    // Goes through a shell because yarn is a .cmd shim on Windows, which Node
+    // refuses to spawn directly (EINVAL). The command is a fixed string, so
+    // there is no argument escaping to get wrong.
+    execSync('yarn install --frozen-lockfile', {cwd: ROOT, stdio: 'inherit'});
+  } catch (error) {
+    fail(
+      `yarn install --frozen-lockfile exited with ${error.status}. Usually ` +
+        'that means yarn.lock is out of sync with package.json. Nothing was ' +
+        'bumped.',
+    );
+  }
 }
 
 function bumpVersion(version, type) {
@@ -145,6 +165,10 @@ function main() {
     pbxRaw,
     'CURRENT_PROJECT_VERSION',
   );
+
+  // Runs once every cheap guard above has passed, so a stale tag or a broken
+  // gradle file fails instantly instead of after a full install.
+  preflight();
 
   const nextPkgRaw = pkgRaw.replace(
     /("version":\s*)"[^"]+"/,
