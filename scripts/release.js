@@ -4,11 +4,17 @@
  * the Android/iOS build number, commits and tags the release. Both platforms
  * share one build number. Signing/building stays in Android Studio.
  *
+ * The "build" type is the exception: it bumps only the Android versionCode,
+ * leaving the version, the versionName and iOS alone, and creates no tag. It is
+ * for re-uploading the same release to the Play Console after a rejected AAB
+ * burned a versionCode. It does drift the Android versionCode ahead of iOS's
+ * CURRENT_PROJECT_VERSION; the next real release realigns them.
+ *
  * Every check runs before anything is written, so a failed release leaves the
  * repo untouched.
  *
  * Usage:
- *   node ./scripts/release.js [patch|minor|major] [--dry-run] [--push]
+ *   node ./scripts/release.js [patch|minor|major|build] [--dry-run] [--push]
  */
 
 const fs = require('fs');
@@ -30,6 +36,10 @@ const PBXPROJ = path.join(
 const PBX_CONFIG_COUNT = 2;
 
 const RELEASE_TYPES = ['patch', 'minor', 'major'];
+// Bumps the Android versionCode only. Not a semver bump, so it is kept out of
+// RELEASE_TYPES and handled as a separate branch throughout.
+const BUILD_TYPE = 'build';
+const BUMP_TYPES = [...RELEASE_TYPES, BUILD_TYPE];
 
 function fail(message) {
   console.error(`\nrelease: ${message}\n`);
@@ -43,11 +53,11 @@ function parseArgs(argv) {
       options.dryRun = true;
     } else if (arg === '--push') {
       options.push = true;
-    } else if (RELEASE_TYPES.includes(arg)) {
+    } else if (BUMP_TYPES.includes(arg)) {
       options.type = arg;
     } else {
       fail(
-        `unknown argument "${arg}". Expected ${RELEASE_TYPES.join(
+        `unknown argument "${arg}". Expected ${BUMP_TYPES.join(
           '|',
         )}, --dry-run or --push.`,
       );
@@ -131,16 +141,22 @@ function setPbxValue(pbx, key, value) {
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
+  const buildOnly = options.type === BUILD_TYPE;
 
   assertCleanTree();
 
   const pkgRaw = fs.readFileSync(PACKAGE_JSON, 'utf8');
   const pkg = JSON.parse(pkgRaw);
   const currentVersion = pkg.version;
-  const nextVersion = bumpVersion(currentVersion, options.type);
-  const tag = `v${nextVersion}`;
+  const nextVersion = buildOnly
+    ? currentVersion
+    : bumpVersion(currentVersion, options.type);
 
-  assertTagIsFree(tag);
+  // A build bump ships under the existing version, so it reuses its tag.
+  const tag = buildOnly ? null : `v${nextVersion}`;
+  if (tag) {
+    assertTagIsFree(tag);
+  }
 
   const gradleRaw = fs.readFileSync(BUILD_GRADLE, 'utf8');
   const currentCode = Number(readGradleValue(gradleRaw, 'versionCode'));
@@ -155,46 +171,55 @@ function main() {
   );
   if (gradleName !== currentVersion) {
     console.warn(
-      `release: warning — versionName (${gradleName}) and package.json (${currentVersion}) disagree; both will be set to ${nextVersion}.`,
+      buildOnly
+        ? `release: warning — versionName (${gradleName}) and package.json (${currentVersion}) disagree; a build bump leaves both as they are.`
+        : `release: warning — versionName (${gradleName}) and package.json (${currentVersion}) disagree; both will be set to ${nextVersion}.`,
     );
   }
 
-  const pbxRaw = fs.readFileSync(PBXPROJ, 'utf8');
-  const currentMarketing = readPbxValues(pbxRaw, 'MARKETING_VERSION');
-  const currentProjectVersion = readPbxValues(
-    pbxRaw,
-    'CURRENT_PROJECT_VERSION',
-  );
+  // iOS is not touched by a build bump, so its project is not even read.
+  const pbxRaw = buildOnly ? null : fs.readFileSync(PBXPROJ, 'utf8');
+  const currentMarketing = buildOnly
+    ? null
+    : readPbxValues(pbxRaw, 'MARKETING_VERSION');
+  const currentProjectVersion = buildOnly
+    ? null
+    : readPbxValues(pbxRaw, 'CURRENT_PROJECT_VERSION');
 
   // Runs once every cheap guard above has passed, so a stale tag or a broken
   // gradle file fails instantly instead of after a full install.
   preflight();
 
-  const nextPkgRaw = pkgRaw.replace(
-    /("version":\s*)"[^"]+"/,
-    `$1"${nextVersion}"`,
-  );
-  const nextGradleRaw = gradleRaw
-    .replace(/^(\s*versionCode\s+).+$/m, `$1${nextCode}`)
-    .replace(/^(\s*versionName\s+).+$/m, `$1"${nextVersion}"`);
-  const nextPbxRaw = setPbxValue(
-    setPbxValue(pbxRaw, 'MARKETING_VERSION', nextVersion),
-    'CURRENT_PROJECT_VERSION',
-    nextCode,
-  );
+  const nextGradleRaw = buildOnly
+    ? gradleRaw.replace(/^(\s*versionCode\s+).+$/m, `$1${nextCode}`)
+    : gradleRaw
+        .replace(/^(\s*versionCode\s+).+$/m, `$1${nextCode}`)
+        .replace(/^(\s*versionName\s+).+$/m, `$1"${nextVersion}"`);
 
-  const message = `Bump ${nextVersion} (${nextCode})`;
+  const message = buildOnly
+    ? `Bump Android build ${nextCode} (${currentVersion})`
+    : `Bump ${nextVersion} (${nextCode})`;
 
-  console.log(`\n  version              ${currentVersion} -> ${nextVersion}`);
+  console.log(
+    `\n  version              ${currentVersion}${
+      buildOnly ? ' (unchanged)' : ` -> ${nextVersion}`
+    }`,
+  );
   console.log(`  versionCode          ${currentCode} -> ${nextCode}`);
-  console.log(
-    `  MARKETING_VERSION    ${currentMarketing.join('/')} -> ${nextVersion}`,
-  );
-  console.log(
-    `  CURRENT_PROJECT_VER  ${currentProjectVersion.join('/')} -> ${nextCode}`,
-  );
+  if (!buildOnly) {
+    console.log(
+      `  MARKETING_VERSION    ${currentMarketing.join('/')} -> ${nextVersion}`,
+    );
+    console.log(
+      `  CURRENT_PROJECT_VER  ${currentProjectVersion.join(
+        '/',
+      )} -> ${nextCode}`,
+    );
+  } else {
+    console.log('  iOS                  untouched');
+  }
   console.log(`  commit               ${message}`);
-  console.log(`  tag                  ${tag}`);
+  console.log(`  tag                  ${tag ?? 'none'}`);
   console.log(`  push                 ${options.push ? 'yes' : 'no'}\n`);
 
   if (options.dryRun) {
@@ -202,27 +227,49 @@ function main() {
     return;
   }
 
-  fs.writeFileSync(PACKAGE_JSON, nextPkgRaw);
   fs.writeFileSync(BUILD_GRADLE, nextGradleRaw);
-  fs.writeFileSync(PBXPROJ, nextPbxRaw);
+  if (!buildOnly) {
+    fs.writeFileSync(
+      PACKAGE_JSON,
+      pkgRaw.replace(/("version":\s*)"[^"]+"/, `$1"${nextVersion}"`),
+    );
+    fs.writeFileSync(
+      PBXPROJ,
+      setPbxValue(
+        setPbxValue(pbxRaw, 'MARKETING_VERSION', nextVersion),
+        'CURRENT_PROJECT_VERSION',
+        nextCode,
+      ),
+    );
+  }
 
   git(
     'add',
-    'package.json',
-    'android/app/build.gradle',
-    'ios/WorkNotes.xcodeproj/project.pbxproj',
+    ...(buildOnly
+      ? ['android/app/build.gradle']
+      : [
+          'package.json',
+          'android/app/build.gradle',
+          'ios/WorkNotes.xcodeproj/project.pbxproj',
+        ]),
   );
   git('commit', '-m', message);
-  git('tag', '-a', tag, '-m', message);
+  if (tag) {
+    git('tag', '-a', tag, '-m', message);
+  }
 
   if (options.push) {
     const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
     git('push', 'origin', branch);
-    git('push', 'origin', tag);
-    console.log(`Pushed ${branch} and ${tag} to origin.\n`);
+    if (tag) {
+      git('push', 'origin', tag);
+    }
+    console.log(`Pushed ${branch}${tag ? ` and ${tag}` : ''} to origin.\n`);
   } else {
     console.log(
-      `Done. Push with: git push origin HEAD && git push origin ${tag}\n`,
+      `Done. Push with: git push origin HEAD${
+        tag ? ` && git push origin ${tag}` : ''
+      }\n`,
     );
   }
 }

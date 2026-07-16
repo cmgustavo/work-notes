@@ -170,3 +170,7 @@ android/.idea
 android/.gradle
 android/local.properties
 android/*.iml
+
+# Signed build outputs, e.g. android/app/release/app-release.aab. The trailing
+# slash keeps this to directories, so the Pods *.release.xcconfig files stay in.
+release/
