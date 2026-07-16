@@ -79,8 +79,8 @@ android {
         applicationId "com.worknotesng"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.0.7"
+        versionCode 5
+        versionName "1.0.8"
     }
     signingConfigs {
         debug {
